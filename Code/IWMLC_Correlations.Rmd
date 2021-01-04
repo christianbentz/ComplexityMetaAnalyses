@@ -40,15 +40,15 @@ Sanity check, look at the number of rows and columns of the data frames.
 ```{r}
 #Track A (should be 49 rows)
 track.a.rows <- c(nrow(gutierrez), nrow(oh))
-print(track.a.rows)
+print(track.a.rows) # this corresponds to the number of languages
 track.a.cols <- c(ncol(gutierrez), ncol(oh))
-print(track.a.cols)
+print(track.a.cols) # this is the number of measures per team
 
 #Track B (should be 63 rows)
 track.b.rows <- c(nrow(brunato), nrow(coltekin), nrow(semenuks), nrow(sinnemaki), nrow(sozinova))
-print(track.b.rows)
+print(track.b.rows) # this corresponds to the number of languages
 track.b.cols <- c(ncol(brunato), ncol(coltekin), ncol(semenuks), ncol(sinnemaki), ncol(sozinova))
-print(track.b.cols)
+print(track.b.cols) # this is the number of measures per team
 ```
 
 # Preprocessing
@@ -67,7 +67,7 @@ head(track.b)
 # Plot Correlations by Track
 
 ## TRACK A
-I here plot correlations between selected measures of the respective track (trying to exclude the ones which are somewhat redundant). The Spearman correlation coefficient is reported instead of the Pearson correlation coefficient. This is because we are only interested whether there is a correlation between the rankings of complexities, regardless of whether this is a linear relationship. I therefore also use the local regression smoothers in the plots (loess) rather than linear models (lm). Note: warning messages are disabled here as there are datasets with NAs, and for each plot this throws a warning message using the ggpairs() plotting function. NAs are delt with by removing the entire row, containing an NA value. The following measures in Gutierrez' contribution are not included here: "GM_TTR.H1", "GM_TTR.H3", "GM_TTR.H1.H3", "GM_TTR.H1_.fullyparallelised.", "GM_TTR.H3_.fullyparallelised.", "GM_TTR.H1.H3_.fullyparallelised.", "GM_H1gram_.fullyparallelised.", "GM_H3gram_.fullyparallelised.", "GM_TTR_.fullyparallelised.". To get a plot of all correlations, the "columns"" argument can just be removed.
+We here plot correlations between selected measures of the respective track (trying to exclude the ones which are somewhat redundant). The Spearman correlation coefficient is reported instead of the Pearson correlation coefficient. This is because we are only interested whether there is a correlation between the rankings of complexities, regardless of whether this is a linear relationship. We therefore also use the local regression smoothers in the plots (loess) rather than linear models (lm). Note: warning messages are disabled here as there are datasets with NAs, and for each plot this throws a warning message using the ggpairs() plotting function. NAs are delt with by removing the entire row, containing an NA value. The following measures in Gutierrez' contribution are not included here: "GM_TTR.H1", "GM_TTR.H3", "GM_TTR.H1.H3", "GM_TTR.H1_.fullyparallelised.", "GM_TTR.H3_.fullyparallelised.", "GM_TTR.H1.H3_.fullyparallelised.", "GM_H1gram_.fullyparallelised.", "GM_H3gram_.fullyparallelised.", "GM_TTR_.fullyparallelised.". To get a plot of all correlations, the "columns"" argument can just be removed.
 ```{r, fig.width = 7, fig.height = 7, warning = FALSE}
 #remove the first two columns for plotting
 track.a.short <- track.a[, 3:ncol(track.a)]
