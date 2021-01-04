@@ -22,18 +22,18 @@ library(ggrepel)
 ```
 
 # Load the Data 
-The participants' results are loaded as csv files into separate data frames. Only use the name of the first author (lower case) to name the data frame.
+The participants' results are loaded as csv files into separate data frames. We only use the name of the first author (lower case) to name the data frame. Note that the below code to load the data files only works if you have cloned the github repository into a local folder named "Github". The tilde symbol '~' replaces the standard location (e.g. home/chris) in linux systems. This will be different for other operating systems.
 ```{r}
-#Track A
-gutierrez <- read.csv("~/Data/IWMLC2019/shared_task/track_A/gutierrez/Gutierrez.csv")
-oh <- read.csv("~/Data/IWMLC2019/shared_task/track_A/oh/oh.csv")
+#Track A (Parallel Bible Corpus, PBC)
+gutierrez <- read.csv("~/Github/ComplexityMetaAnalyses/Data/PBCtrack/Gutierrez/Gutierrez.csv")
+oh <- read.csv("~/Github/ComplexityMetaAnalyses/Data/PBCtrack/Oh/oh.csv")
 
-#TRACK B
-brunato <- read.csv("~/Data/IWMLC2019/shared_task/track_B/brunato_venturi/Brunato-Venturi.csv")
-coltekin <- read.csv("~/Data/IWMLC2019/shared_task/track_B/coltekin_rama/coltekin.csv")
-semenuks <- read.csv("~/Data/IWMLC2019/shared_task/track_B/semenuks/Semenuks.csv")
-sinnemaki <- read.csv("~/Data/IWMLC2019/shared_task/track_B/sinnemaki/Sinnemaki.csv")
-sozinova <- read.csv("~/Data/IWMLC2019/shared_task/track_B/sozinova_etal/Sozinova.csv")
+#TRACK B (Universal Dependencies, UD)
+brunato <- read.csv("~/Github/ComplexityMetaAnalyses/Data/UDtrack/Brunato_venturi/Brunato-Venturi.csv")
+coltekin <- read.csv("~/Github/ComplexityMetaAnalyses/Data/UDtrack/Coltekin_rama/coltekin.csv")
+semenuks <- read.csv("~/Github/ComplexityMetaAnalyses/Data/UDtrack/Semenuks/Semenuks.csv")
+sinnemaki <- read.csv("~/Github/ComplexityMetaAnalyses/Data/UDtrack/Sinnemaki/Sinnemaki.csv")
+sozinova <- read.csv("~/Github/ComplexityMetaAnalyses/Data/UDtrack/Sozinova_etal/sozinova_etal.csv")
 ```
 
 Sanity check, look at the number of rows and columns of the data frames.
