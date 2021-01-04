@@ -84,7 +84,7 @@ print(track.a.plot)
 
 Safe plot to file.
 ```{r, fig.width = 7, fig.height = 7, warning = FALSE}
-ggsave("/home/chris/Workshops/IWMLC2019/Analyses/track_a_plot.pdf", track.a.plot, dpi = 300, scale = 1, width = 10, height = 10, device = cairo_pdf)
+ggsave("~/Github/ComplexityMetaAnalyses/Figures/TrackA/track_a_plot.pdf", track.a.plot, dpi = 300, scale = 1, width = 10, height = 10, device = cairo_pdf)
 ```
 
 
@@ -107,9 +107,8 @@ print(track.b.plot)
 
 Safe plot to file.
 ```{r, fig.width = 20, fig.height = 20, warning = FALSE}
-ggsave("/home/chris/Workshops/IWMLC2019/Analyses/track_b_plot.pdf", track.b.plot, dpi = 300, scale = 1, width = 20, height = 20, device = cairo_pdf)
+ggsave("~/Github/ComplexityMetaAnalyses/Figures/TrackB/track_b_plot.pdf", track.b.plot, dpi = 300, scale = 1, width = 20, height = 20, device = cairo_pdf)
 ```
-
 
 #Significant Correlations
 Not all of the correlations displayed above are going to be significant. I here only select the ones still significant after correcting for multiple testing. Therefore, first calculate Spearman correlations and uncorrected p-values using the function rcorr(). These are then stored in a data frame where the first two columns give the names of the correlated measures. 
