@@ -111,7 +111,7 @@ ggsave("~/Github/ComplexityMetaAnalyses/Figures/TrackB/track_b_plot.pdf", track.
 ```
 
 #Significant Correlations
-Not all of the correlations displayed above are going to be significant. I here only select the ones still significant after correcting for multiple testing. Therefore, first calculate Spearman correlations and uncorrected p-values using the function rcorr(). These are then stored in a data frame where the first two columns give the names of the correlated measures. 
+Not all of the correlations displayed above are going to be significant. We only select the ones still significant after correcting for multiple testing. Therefore, first calculate Spearman correlations and uncorrected p-values using the function rcorr(). These are then stored in a data frame where the first two columns give the names of the correlated measures. 
 
 ##TRACK A
 ```{r}
