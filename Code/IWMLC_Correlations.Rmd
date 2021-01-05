@@ -67,50 +67,49 @@ head(track.b)
 # Plot Correlations by Track
 
 ## TRACK A
-We here plot correlations between selected measures of the respective track (trying to exclude the ones which are somewhat redundant). The Spearman correlation coefficient is reported instead of the Pearson correlation coefficient. This is because we are only interested whether there is a correlation between the rankings of complexities, regardless of whether this is a linear relationship. We therefore also use the local regression smoothers in the plots (loess) rather than linear models (lm). Note: warning messages are disabled here as there are datasets with NAs, and for each plot this throws a warning message using the ggpairs() plotting function. NAs are delt with by removing the entire row, containing an NA value. The following measures in Gutierrez' contribution are not included here: "GM_TTR.H1", "GM_TTR.H3", "GM_TTR.H1.H3", "GM_TTR.H1_.fullyparallelised.", "GM_TTR.H3_.fullyparallelised.", "GM_TTR.H1.H3_.fullyparallelised.", "GM_H1gram_.fullyparallelised.", "GM_H3gram_.fullyparallelised.", "GM_TTR_.fullyparallelised.". To get a plot of all correlations, the "columns" argument can just be removed.
-```{r, fig.width = 7, fig.height = 7, warning = FALSE}
+We here plot correlations between selected measures of the respective track (trying to exclude the ones which are somewhat redundant). The Spearman correlation coefficient is reported instead of the Pearson correlation coefficient. This is because we are only interested whether there is a correlation between the rankings of complexities, regardless of whether this is a linear relationship. We therefore also use the local regression smoothers in the plots (loess) rather than linear models (lm). Note: warning messages are disabled here as there are datasets with NAs, and for each plot this throws a warning message using the ggpairs() plotting function. NAs are delt with by removing the entire row, containing an NA value. 
+```{r, fig.width = 15, fig.height = 15, warning = FALSE}
 #remove the first two columns for plotting
 track.a.short <- track.a[, 3:ncol(track.a)]
 
 track.a.plot <- ggpairs(track.a.short, 
-                        lower = list(continuous = wrap("smooth_loess", alpha = 0.3, lwd = 0.5, size = 2)), 
-                        upper = list(continuous = wrap('cor', method = "spearman")),
-                        columns = c("GM_H1gram", "GM_H3gram", "GM_TTR",
-                              "O_MC", "O_WID", "O_SID")) +
+                        lower = list(continuous = wrap("smooth_loess", alpha = 0.3, lwd = 0.5, size = 2)),
+                        upper = list(continuous = wrap('cor', method = "spearman"))) +
                         theme_bw() +
                         theme(axis.text.x = element_text(angle = 90, hjust = 1))
 print(track.a.plot)
 ```
 
 Safe plot to file.
-```{r, fig.width = 7, fig.height = 7, warning = FALSE}
-ggsave("~/Github/ComplexityMetaAnalyses/Figures/TrackA/track_a_plot.pdf", track.a.plot, dpi = 300, scale = 1, width = 10, height = 10, device = cairo_pdf)
+```{r, warning = FALSE}
+ggsave("~/Github/ComplexityMetaAnalyses/Figures/TrackA/track_a_plot.pdf", track.a.plot, dpi = 300, scale = 1, width = 15, height = 15, device = cairo_pdf)
 ```
 
 
 ## TRACK B
-Same for the Track B data. Again, not all of the measures are plotted (there are 27 overall).
-```{r, fig.width = 10, fig.height = 10, warning = FALSE}
+Same for the Track B data. Not all measures are included here (there would be 27). To include them all, the "columns" argument in the code below might be removed.
+```{r, fig.width = 15, fig.height = 15, warning = FALSE}
 #remove the first to columns for plotting
 track.b.short <- track.b[, 3:ncol(track.b)]
 
 track.b.plot <- ggpairs(track.b.short, progress = TRUE,
-                        lower = list(continuous = wrap("smooth_loess", alpha = 0.3, lwd = 0.5, size = 2)), 
+                        lower = list(continuous = wrap("smooth_loess", alpha = 0.3, lwd = 0.5, size = 2)),
                         upper = list(continuous = wrap('cor', method = "spearman")),
                         columns = c("BV_n_tokens", "BV_char_per_tok", "BV_avg_links_len",
-                              "BV_avg_max_depth", "CR_inflection_accuracy", "CR_ttr", "S_idMean", "S_idSD", 
-                              "SI_dm", "SI_hm", "SI_dep_dl", "SBS_INF", "SBS_DER")) +
+                              "BV_avg_max_depth", "CR_inflection_accuracy", "CR_ttr", 
+                              "S_idMean", "S_idSD", "SI_dm", "SI_hm", "SI_dep_dl", 
+                              "SBS_INF", "SBS_DER")) +
                         theme_bw() +
                         theme(axis.text.x = element_text(angle = 90, hjust = 1))
 print(track.b.plot)
 ```
 
 Safe plot to file.
-```{r, fig.width = 20, fig.height = 20, warning = FALSE}
-ggsave("~/Github/ComplexityMetaAnalyses/Figures/TrackB/track_b_plot.pdf", track.b.plot, dpi = 300, scale = 1, width = 20, height = 20, device = cairo_pdf)
+```{r, warning = FALSE}
+ggsave("~/Github/ComplexityMetaAnalyses/Figures/TrackB/track_b_plot.pdf", track.b.plot, dpi = 300, scale = 1, width = 15, height = 15, device = cairo_pdf)
 ```
 
-# Significant Correlations
+# Significant Correlations after Bonferroni Correction
 Not all of the correlations displayed above are going to be significant. We only select the ones still significant after correcting for multiple testing. Therefore, first calculate Spearman correlations and uncorrected p-values using the function rcorr(). These are then stored in a data frame where the first two columns give the names of the correlated measures. 
 
 ## TRACK A
@@ -132,7 +131,7 @@ head(track.a.df)
 
 ## TRACK B
 Same as above for Track A.
-```{r, echo = FALSE}
+```{r, message = FALSE}
 track.b.matrix <- as.matrix(track.b.short)
 track.b.cor <- rcorr(track.b.matrix, type = "spearman")$r
 track.b.pvalues <- rcorr(track.b.matrix, type = "spearman")$P
@@ -145,7 +144,7 @@ track.b.df <- data.frame(row = rownames(track.b.pvalues)[row(track.b.pvalues)[up
 #head(track.b.df)
 ```
 
-## Bonferroni Correction
+## Apply Bonferroni Correction
 Apply the so-called Bonferroni correction, namely, multiply the p-values by the overall number of tests done. Arguably, this is the simplest, and also most conservative method for correcting the p-values. There are less-conservative alternatives such as the Holm-Bonferroni correction. Since the approach here is purely exploratory, and we have many measures and hence pairwise correlations anyways, we decided to go for the most conservative method. 
 ```{r}
 # compute the overall number of tests, i.e. multiply the number of measures in each track with the same number -1 (don't count tests for a measure with itself), and add them up.
@@ -177,7 +176,7 @@ print(track.b.df)
 ```
 
 # Positive Correlations 
-I here plot the six highest *positive* correlations (in terms of Spearman coefficients) which are still significant after the Bonferroni correction *and* which are found between measures proposed by *different participants* (there are many measures by the same participants that highly correlate). These are hand-picked from the lists above (could also be implemented more elegantly).
+We here plot the six highest *positive* correlations (in terms of Spearman coefficients) which are still significant after the Bonferroni correction *and* which are found between measures proposed by *different participants* (there are many measures by the same participants that highly correlate). These are hand-picked from the lists above.
 
 ## TRACK A
 Plot the six significant correlations with highest Spearman coefficients for Track A. Warning messages are disabled since there are several NAs that throw errors.
@@ -288,19 +287,20 @@ ggsave("~/Github/ComplexityMetaAnalyses/Figures/TrackB/track_b_plot_corrected.pd
 ```
 
 ## Detailed Plots
-The code below adds labels to the points of plots, which helps with the intepretation of results. I here choose the two plots of Track A and Track B with the highest positive Pearson correlations. 
+The code below adds labels to the points of plots, which helps with the intepretation of results. We here choose the two plots of Track A and Track B with the highest positive Spearman correlations. 
 
 # TRACK A
-```{r, fig.width = 7, fig.height = 7, warning = FALSE}
+```{r, fig.width = 5, fig.height = 5, warning = FALSE}
 #track.a <- track.a[track.a$id != "mya", ] # remove the outlier Burmese (mya)
 
 track.a.plot1.detailed <- ggplot(track.a, aes(x = GM_TTR_.fullyparallelised., y = O_WID)) + 
-  geom_point() +
-  geom_smooth(method = loess) +
-  geom_label_repel(data = track.a[track.a$language == "Fijian" | track.a$language == "Sango" | track.a$language == "Tagalog" | track.a$language == "Vietnamese" | track.a$language == "Vietnamese" | track.a$language == "Hausa" | track.a$language == "German" | track.a$language == "English" | track.a$language == "Georgian" | track.a$language == "Nama (Namibia)" | track.a$language == "Modern Greek" | track.a$language == "Russian" | track.a$language == "Swahili" | track.a$language == "Basque" | track.a$language == "Finnish" | track.a$language == "Turkish" | track.a$language == "Korean" | track.a$language == "Kalaallisut" | track.a$language == "Burmese" | track.a$language == "Mapudungun", ], 
-                   aes(label = language, 
-                       fill = factor(language)), color = 'black',
-                       size = 3.5) +
+  geom_point(alpha = 0.3) +
+  geom_smooth(method = loess, alpha = 0.3) +
+  geom_label_repel(data = track.a[track.a$language == "Fijian" | track.a$language == "Sango" | track.a$language == "Vietnamese" | track.a$language == "Vietnamese" | track.a$language == "English" | track.a$language == "Georgian" |  track.a$language == "Russian" | track.a$language == "Swahili" | track.a$language == "Basque" | track.a$language == "Finnish" | track.a$language == "Turkish" | track.a$language == "Korean" | track.a$language == "Kalaallisut" | track.a$language == "Burmese", ],
+                   min.segment.length = 0,
+                   #nudge_x = 0.1,
+                   aes(label = language), 
+                       size = 3) +
   labs(title = paste("r = ", 
                      round(track.a.df[track.a.df$row == "GM_TTR_.fullyparallelised." & track.a.df$col == "O_WID", ]$corr, 2), 
                      sep = "")) +
@@ -308,23 +308,24 @@ track.a.plot1.detailed <- ggplot(track.a, aes(x = GM_TTR_.fullyparallelised., y 
 track.a.plot1.detailed
 ```
 
-```{r, fig.width = 10, fig.height = 10, warning = FALSE}
-ggsave("~/Github/ComplexityMetaAnalyses/Figures/TrackA/track_a_plot1_detailed.pdf", track.a.plot1.detailed, dpi = 300, scale = 1, width = 10, height = 10, device = cairo_pdf)
+```{r, warning = FALSE}
+ggsave("~/Github/ComplexityMetaAnalyses/Figures/TrackA/track_a_plot1_detailed.pdf", track.a.plot1.detailed, dpi = 300, scale = 1, width = 5, height = 5, device = cairo_pdf)
 ```
 
 Some comments: This plot shows that the Type-Token Ratio (TTR) and the Word Information Density (WID) are highly correlated across the languages of the Parallel Bible Corpus sample. Burmese (mya) is an outlier here with very high TTR and WID. This is an artifact of the writing system, since it does not delimit orthographic words by white spaces, but rather phrases. For Kalaallisut, on the other hand, the result makes sense (if we accept the latinized writing proposed for this language). Some of the low TTR languages include Sango (sag), Fijian (fij), Thai (tha), and Yoruba (yor).   
 
 # TRACK B
-```{r, fig.width = 7, fig.height = 7, warning = FALSE}
+```{r, fig.width = 5, fig.height = 5, warning = FALSE}
 #track.b <- track.b[track.b$id != "uig", ] # remove the outlier Uyghur (uig)
 
 track.b.plot1.detailed <- ggplot(track.b, aes(x = CR_msp, y = SBS_INF)) + 
-  geom_point() +
-  geom_smooth(method = loess) +
-  geom_label_repel(data = track.b[track.b$language == "Chinese" | track.b$language == "Vietnamese" | track.b$language == "German" | track.b$language == "English" | track.b$language == "Hungarian" | track.b$language == "Greek" | track.b$language == "Russian" | track.b$language == "Old Church Slavonic" | track.b$language == "Basque" | track.b$language == "Finnish" | track.b$language == "Turkish" | track.b$language == "Korean" | track.b$language == "Latin" | track.b$language == "Uyghur" | track.b$language == "Ancient Greek", ],
-                   aes(label = language,
-                    fill = factor(language)), color = 'black',
-                    size = 3.5) +
+  geom_point(alpha = 0.3) +
+  geom_smooth(method = loess, alpha = 0.3) +
+  geom_label_repel(data = track.b[track.b$language == "Chinese" | track.b$language == "Vietnamese" | track.b$language == "English" | track.b$language == "Russian" | track.b$language == "Old Church Slavonic" | track.b$language == "Basque" | track.b$language == "Finnish" | track.b$language == "Turkish" | track.b$language == "Latin" | track.b$language == "Uyghur" | track.b$language == "Ancient Greek", ],
+                   min.segment.length = 0,
+                   #nudge_x = 0.1,
+                   aes(label = language), 
+                   size = 3) +
   labs(title = paste("r = ", 
                      round(track.b.df[track.b.df$row == "CR_msp" & track.b.df$col == "SBS_INF", ]$corr, 2), 
                      sep = "")) +
@@ -333,7 +334,7 @@ track.b.plot1.detailed
 ```
 
 ```{r, fig.width = 10, fig.height = 10, warning = FALSE}
-ggsave("~/Github/ComplexityMetaAnalyses/Figures/TrackB/track_b_plot1_detailed.pdf", track.b.plot1.detailed, dpi = 300, scale = 1, width = 10, height = 10, device = cairo_pdf)
+ggsave("~/Github/ComplexityMetaAnalyses/Figures/TrackB/track_b_plot1_detailed.pdf", track.b.plot1.detailed, dpi = 300, scale = 1, width = 5, height = 5, device = cairo_pdf)
 ```
 
 Some comments: This plot shows the correlation between the so-called Mean Size of Morphological Paradigms (MSP), which is defined by CR as "simply the number of word-form types divided by the number of lemma types", and the difference in unigram entropy of word tokens in the original texts and the lemmatized texts (INF) as defined by SBS. It is certainly not unexpected, but reassuring, to see these measure highly correlated. The outlier to the high end Uyghur (uig) is likely *not* an artifact, as this language indeed has many productive morphological paradigms. Other languages to the high end of morphological complexity include Ancient Greek (grc), Classical Latin (lat), Turkish (tur), and Old Church Slavonic (chu). Languages to the low end are Vietnamese (vie), Indonesian (ind), Mandarin Chinese (cmn), and Afrikaans (afr). Note that the very low morphological complexity scores of Korean (kor) are an artifact of the way the Korean data is presented in the UD. Namely, the "lemmas" given for Korean are actually merely morphologically segmented forms rather than inflectionally neutralized forms as for the other languages. Thus, it makes sense that the MSP is exactly 1 and the INF is 0. 
@@ -396,15 +397,16 @@ ggsave("~/Github/ComplexityMetaAnalyses/Figures/TrackB/track_b_plot_negative_cor
 ```
 
 ## Detailed Plots
-```{r, fig.width = 10, fig.height = 10, warning = FALSE}
+```{r, fig.width = 5, fig.height = 5, warning = FALSE}
 #track.b <- track.b[track.b$id != "uig", ] # remove the outlier Uyghur (uig)
 
 track.b.plot1.negative.detailed <- ggplot(track.b, aes(x = CR_inflection_accuracy, y = SBS_INF)) + 
-  geom_point() +
-  geom_smooth(method = loess) +
-  geom_label_repel(aes(label = id,
-                    fill = factor(language)), color = 'black',
-                    size = 3.5) +
+  geom_point(alpha = 0.3) +
+  geom_smooth(method = loess, alpha = 0.3) +
+  geom_label_repel(min.segment.length = 0,
+                   #nudge_x = 0.1,
+                   aes(label = language), 
+                   size = 3) +
   labs(title = paste("r = ", 
                      round(track.b.df[track.b.df$row == "CR_inflection_accuracy" & track.b.df$col == "SBS_INF", ]$corr, 2), 
                      sep = "")) +
@@ -413,20 +415,21 @@ track.b.plot1.negative.detailed
 ```
 
 ```{r, fig.width = 10, fig.height = 10, warning = FALSE}
-ggsave("~/Github/ComplexityMetaAnalyses/Figures/TrackB/track_b_plot1_negative_detailed.pdf", track.b.plot1.negative.detailed, dpi = 300, scale = 1, width = 10, height = 10, device = cairo_pdf)
+ggsave("~/Github/ComplexityMetaAnalyses/Figures/TrackB/track_b_plot1_negative_detailed.pdf", track.b.plot1.negative.detailed, dpi = 300, scale = 1, width = 5, height = 5, device = cairo_pdf)
 ```
 
 
-```{r, fig.width = 7, fig.height = 7, warning = FALSE}
+```{r, fig.width = 5, fig.height = 5, warning = FALSE}
 #track.b <- track.b[track.b$language != "Korean", ] # remove the outlier Korean
 
 track.b.plot2.negative.detailed <- ggplot(track.b, aes(x = CR_mfe, y = SI_dep_dl)) + 
-  geom_point() +
-  geom_smooth(method = loess) +
+  geom_point(alpha = 0.3) +
+  geom_smooth(method = loess, alpha = 0.3) +
   geom_label_repel(data = track.b[track.b$language == "Chinese" | track.b$language == "Vietnamese" | track.b$language == "German" | track.b$language == "English" | track.b$language == "Hungarian" | track.b$language == "Greek" | track.b$language == "Russian" | track.b$language == "Old Church Slavonic" | track.b$language == "Basque" | track.b$language == "Finnish" | track.b$language == "Turkish" | track.b$language == "Korean" | track.b$language == "Latin" | track.b$language == "Uyghur" | track.b$language == "Ancient Greek", ],
-                    aes(label = language,
-                    fill = factor(language)), color = 'black',
-                    size = 3.5) +
+                    min.segment.length = 0,
+                   #nudge_x = 0.1,
+                   aes(label = language), 
+                   size = 3) +
   labs(title = paste("r = ", 
                      round(track.b.df[track.b.df$row == "CR_mfe" & track.b.df$col == "SI_dep_dl", ]$corr, 2), 
                      sep = "")) +
@@ -435,7 +438,7 @@ track.b.plot2.negative.detailed
 ```
 
 ```{r, fig.width = 10, fig.height = 10, warning = FALSE}
-ggsave("~/Github/ComplexityMetaAnalyses/Figures/TrackB/track_b_plot2_negative_detailed.pdf", track.b.plot2.negative.detailed, dpi = 300, scale = 1, width = 10, height = 10, device = cairo_pdf)
+ggsave("~/Github/ComplexityMetaAnalyses/Figures/TrackB/track_b_plot2_negative_detailed.pdf", track.b.plot2.negative.detailed, dpi = 300, scale = 1, width = 5, height = 5, device = cairo_pdf)
 ```
 
 # Conclusions
