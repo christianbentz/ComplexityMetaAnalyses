@@ -1,7 +1,7 @@
 ---
-title: "IWMLC2019: Correlations Between Measures"
+title: "Correlations Between Complexity Measures"
 author: "Chris Bentz"
-date: "January 4, 2021"
+date: "January 5, 2021"
 output:
   html_document: default
   pdf_document: default
@@ -13,7 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Load Libraries
 If the libraries are not installed yet, you need to install them using, for example, the command: install.packages("ggplot2").
-```{r}
+```{r, message = FALSE}
 library(ggplot2)
 library(gridExtra)
 library(GGally)
@@ -22,7 +22,7 @@ library(ggrepel)
 ```
 
 # Load the Data 
-The participants' results are loaded as csv files into separate data frames. We only use the name of the first author (lower case) to name the data frame. Note that the below code to load the data files only works if you have cloned the github repository into a local folder named "Github". The tilde symbol '~' replaces the standard location (e.g. home/chris) in linux systems. This will be different for other operating systems.
+The participants' results are loaded as csv files into separate data frames. We only use the name of the first author (lower case) to name the data frame. Note that the below code to load the data files only works if you have cloned the github repository into a local folder named "Github". The tilde symbol '~' replaces the standard location (e.g. home/...) in linux systems. This will be different for other operating systems.
 ```{r}
 #Track A (Parallel Bible Corpus, PBC)
 gutierrez <- read.csv("~/Github/ComplexityMetaAnalyses/Data/PBCtrack/Gutierrez/Gutierrez.csv")
@@ -67,7 +67,7 @@ head(track.b)
 # Plot Correlations by Track
 
 ## TRACK A
-We here plot correlations between selected measures of the respective track (trying to exclude the ones which are somewhat redundant). The Spearman correlation coefficient is reported instead of the Pearson correlation coefficient. This is because we are only interested whether there is a correlation between the rankings of complexities, regardless of whether this is a linear relationship. We therefore also use the local regression smoothers in the plots (loess) rather than linear models (lm). Note: warning messages are disabled here as there are datasets with NAs, and for each plot this throws a warning message using the ggpairs() plotting function. NAs are delt with by removing the entire row, containing an NA value. The following measures in Gutierrez' contribution are not included here: "GM_TTR.H1", "GM_TTR.H3", "GM_TTR.H1.H3", "GM_TTR.H1_.fullyparallelised.", "GM_TTR.H3_.fullyparallelised.", "GM_TTR.H1.H3_.fullyparallelised.", "GM_H1gram_.fullyparallelised.", "GM_H3gram_.fullyparallelised.", "GM_TTR_.fullyparallelised.". To get a plot of all correlations, the "columns"" argument can just be removed.
+We here plot correlations between selected measures of the respective track (trying to exclude the ones which are somewhat redundant). The Spearman correlation coefficient is reported instead of the Pearson correlation coefficient. This is because we are only interested whether there is a correlation between the rankings of complexities, regardless of whether this is a linear relationship. We therefore also use the local regression smoothers in the plots (loess) rather than linear models (lm). Note: warning messages are disabled here as there are datasets with NAs, and for each plot this throws a warning message using the ggpairs() plotting function. NAs are delt with by removing the entire row, containing an NA value. The following measures in Gutierrez' contribution are not included here: "GM_TTR.H1", "GM_TTR.H3", "GM_TTR.H1.H3", "GM_TTR.H1_.fullyparallelised.", "GM_TTR.H3_.fullyparallelised.", "GM_TTR.H1.H3_.fullyparallelised.", "GM_H1gram_.fullyparallelised.", "GM_H3gram_.fullyparallelised.", "GM_TTR_.fullyparallelised.". To get a plot of all correlations, the "columns" argument can just be removed.
 ```{r, fig.width = 7, fig.height = 7, warning = FALSE}
 #remove the first two columns for plotting
 track.a.short <- track.a[, 3:ncol(track.a)]
@@ -110,10 +110,10 @@ Safe plot to file.
 ggsave("~/Github/ComplexityMetaAnalyses/Figures/TrackB/track_b_plot.pdf", track.b.plot, dpi = 300, scale = 1, width = 20, height = 20, device = cairo_pdf)
 ```
 
-#Significant Correlations
+# Significant Correlations
 Not all of the correlations displayed above are going to be significant. We only select the ones still significant after correcting for multiple testing. Therefore, first calculate Spearman correlations and uncorrected p-values using the function rcorr(). These are then stored in a data frame where the first two columns give the names of the correlated measures. 
 
-##TRACK A
+## TRACK A
 ```{r}
 #transform the data frame to a matrix
 track.a.matrix <- as.matrix(track.a.short)
@@ -130,7 +130,7 @@ track.a.df <- data.frame(row = rownames(track.a.pvalues)[row(track.a.pvalues)[up
 head(track.a.df)
 ```
 
-##TRACK B
+## TRACK B
 Same as above for Track A.
 ```{r, echo = FALSE}
 track.b.matrix <- as.matrix(track.b.short)
@@ -145,7 +145,7 @@ track.b.df <- data.frame(row = rownames(track.b.pvalues)[row(track.b.pvalues)[up
 #head(track.b.df)
 ```
 
-##Bonferroni Correction
+## Bonferroni Correction
 Apply the so-called Bonferroni correction, namely, multiply the p-values by the overall number of tests done. Arguably, this is the simplest, and also most conservative method for correcting the p-values. There are less-conservative alternatives such as the Holm-Bonferroni correction. Since the approach here is purely exploratory, and we have many measures and hence pairwise correlations anyways, we decided to go for the most conservative method. 
 ```{r}
 # compute the overall number of tests, i.e. multiply the number of measures in each track with the same number -1 (don't count tests for a measure with itself), and add them up.
@@ -179,7 +179,7 @@ print(track.b.df)
 # Positive Correlations 
 I here plot the six highest *positive* correlations (in terms of Spearman coefficients) which are still significant after the Bonferroni correction *and* which are found between measures proposed by *different participants* (there are many measures by the same participants that highly correlate). These are hand-picked from the lists above (could also be implemented more elegantly).
 
-##TRACK A
+## TRACK A
 Plot the six significant correlations with highest Spearman coefficients for Track A. Warning messages are disabled since there are several NAs that throw errors.
 ```{r, fig.width = 12, fig.height = 8, warning = FALSE, echo = FALSE}
 track.a.plot1 <- ggplot(track.a.short, aes(x = GM_TTR_.fullyparallelised., y = O_WID)) + 
@@ -233,7 +233,7 @@ track.a.plot.corrected <- grid.arrange(track.a.plot1, track.a.plot2, track.a.plo
 ggsave("~/Github/ComplexityMetaAnalyses/Figures/TrackA/track_a_plot_corrected.pdf", track.a.plot.corrected, dpi = 300, scale = 1, width = 10, height = 7.5, device = cairo_pdf)
 ```
 
-##TRACK B
+## TRACK B
 Plot the six significant correlations with highest Spearman coefficients for Track B. Warning messages are disabled since there are several NAs that throw errors.
 ```{r, fig.width = 12, fig.height = 8, warning = FALSE, echo = FALSE}
 track.b.plot1 <- ggplot(track.b.short, aes(x = CR_msp, y = SBS_INF)) + 
@@ -290,7 +290,7 @@ ggsave("~/Github/ComplexityMetaAnalyses/Figures/TrackB/track_b_plot_corrected.pd
 ## Detailed Plots
 The code below adds labels to the points of plots, which helps with the intepretation of results. I here choose the two plots of Track A and Track B with the highest positive Pearson correlations. 
 
-#TRACK A
+# TRACK A
 ```{r, fig.width = 7, fig.height = 7, warning = FALSE}
 #track.a <- track.a[track.a$id != "mya", ] # remove the outlier Burmese (mya)
 
@@ -314,7 +314,7 @@ ggsave("~/Github/ComplexityMetaAnalyses/Figures/TrackA/track_a_plot1_detailed.pd
 
 Some comments: This plot shows that the Type-Token Ratio (TTR) and the Word Information Density (WID) are highly correlated across the languages of the Parallel Bible Corpus sample. Burmese (mya) is an outlier here with very high TTR and WID. This is an artifact of the writing system, since it does not delimit orthographic words by white spaces, but rather phrases. For Kalaallisut, on the other hand, the result makes sense (if we accept the latinized writing proposed for this language). Some of the low TTR languages include Sango (sag), Fijian (fij), Thai (tha), and Yoruba (yor).   
 
-#TRACK B
+# TRACK B
 ```{r, fig.width = 7, fig.height = 7, warning = FALSE}
 #track.b <- track.b[track.b$id != "uig", ] # remove the outlier Uyghur (uig)
 
@@ -341,7 +341,7 @@ Some comments: This plot shows the correlation between the so-called Mean Size o
 # Negative Correlations 
 I here plot the six highest *negative* correlations (in terms of Spearman coefficients) which are still significant after the Bonferroni correction *and* which are found between measures proposed by *different participants* (there are many measures by the same participants that highly correlate). These are hand-picked from the lists above (could also be implemented more elegantly).
 
-##TRACK B (TRACK A does not yield negative correlations)
+## TRACK B (TRACK A does not yield negative correlations)
 Plot the six significant correlations with lowest (i.e. negative) Spearman coefficients for Track B. Warning messages are disabled since there are several NAs that throw errors.
 ```{r, fig.width = 12, fig.height = 8, warning = FALSE, echo = FALSE}
 track.b.plot1 <- ggplot(track.b.short, aes(x = CR_inflection_accuracy, y = CR_msp)) + 
