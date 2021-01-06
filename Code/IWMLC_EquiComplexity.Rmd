@@ -1,7 +1,7 @@
 ---
 title: 'IWMLC: Meta-Analyses of Complexity Results'
 author: "Chris Bentz"
-date: "November 09, 2020"
+date: "January 06, 2021"
 output:
   html_document: default
   pdf_document: default
@@ -81,9 +81,9 @@ Plot density distributions of complexity measurements by language. Individual me
 
 Get mean, median, and standard deviation values.
 ```{r}
-mu <- ddply(results.long, "id", summarise, grp.mean = mean(value, na.rm = T)) # get mean values for each language 
-med <- ddply(results.long, "id", summarise, grp.median = median(value, na.rm = T)) # get median values for each language
-sdev <- ddply(results.long, "id", summarise, grp.sd = sd(value, na.rm = T)) # get standard deviation values for each language
+mu <- ddply(results.long, "language", summarise, grp.mean = mean(value, na.rm = T)) # get mean values for each language 
+med <- ddply(results.long, "language", summarise, grp.median = median(value, na.rm = T)) # get median values for each language
+sdev <- ddply(results.long, "language", summarise, grp.sd = sd(value, na.rm = T)) # get standard deviation values for each language
 ```
 
 Plot density distributions with indication of median (mean) values.
@@ -94,7 +94,7 @@ density.plot <- ggplot(results.long, aes(x = value)) +
  geom_density(alpha = .2, fill = "grey", color = "darkgrey") +
  geom_jitter(data = results.long, aes(x = value, y = 0), 
              size = 1, height = 0.1, width = 0) +
- facet_wrap(~ id) +
+ facet_wrap(~ language) +
  # geom_vline(data = mu, aes(xintercept=grp.mean),
  #           linetype = "dotted") +
  geom_vline(data = med, aes(xintercept = grp.median),
@@ -108,8 +108,8 @@ print(density.plot)
 
 Safe figure to file.
 ```{r, fig.width = 12, fig.height = 10}
-ggsave("Figures/iwmlc_densities.pdf", density.plot, dpi = 300, scale = 1, 
-       device = cairo_pdf)
+#ggsave("Figures/iwmlc_densities.pdf", density.plot, dpi = 300, scale = 1, 
+       #device = cairo_pdf)
 ```
 
 ## STATISTICAL TESTS
