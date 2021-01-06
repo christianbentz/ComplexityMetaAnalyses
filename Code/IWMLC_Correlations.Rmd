@@ -3,8 +3,8 @@ title: "Correlations Between Complexity Measures"
 author: "Chris Bentz"
 date: "January 5, 2021"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
