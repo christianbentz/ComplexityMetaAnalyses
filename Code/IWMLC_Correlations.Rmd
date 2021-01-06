@@ -14,6 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 # Load Libraries
 If the libraries are not installed yet, you need to install them using, for example, the command: install.packages("ggplot2").
 ```{r, message = FALSE}
+library(readr)
 library(ggplot2)
 library(gridExtra)
 library(GGally)
@@ -22,40 +23,40 @@ library(ggrepel)
 ```
 
 # Load the Data 
-The participants' results are loaded as csv files into separate data frames. We only use the name of the first author (lower case) to name the data frame. Note that the below code to load the data files only works if you have cloned the github repository into a local folder named "Github". The tilde symbol '~' replaces the standard location (e.g. home/...) in linux systems. This will be different for other operating systems.
-```{r}
+The participants' results are loaded as csv files directly from the github repository into separate data frames. We only use the name of the first author (lower case) to name the data frame.
+```{r, message = FALSE}
 #Track A (Parallel Bible Corpus, PBC)
-gutierrez <- read.csv("~/Github/ComplexityMetaAnalyses/Data/PBCtrack/Gutierrez/Gutierrez.csv")
-oh <- read.csv("~/Github/ComplexityMetaAnalyses/Data/PBCtrack/Oh/oh.csv")
+gutierrez.results <- read_csv("https://raw.githubusercontent.com/IWMLC/language-complexity-metrics/master/PBCtrack/Gutierrez/Gutierrez.csv")
+oh.results <- read_csv("https://raw.githubusercontent.com/IWMLC/language-complexity-metrics/master/PBCtrack/Oh/oh.csv")
 
 #TRACK B (Universal Dependencies, UD)
-brunato <- read.csv("~/Github/ComplexityMetaAnalyses/Data/UDtrack/Brunato_venturi/Brunato-Venturi.csv")
-coltekin <- read.csv("~/Github/ComplexityMetaAnalyses/Data/UDtrack/Coltekin_rama/coltekin.csv")
-semenuks <- read.csv("~/Github/ComplexityMetaAnalyses/Data/UDtrack/Semenuks/Semenuks.csv")
-sinnemaki <- read.csv("~/Github/ComplexityMetaAnalyses/Data/UDtrack/Sinnemaki/Sinnemaki.csv")
-sozinova <- read.csv("~/Github/ComplexityMetaAnalyses/Data/UDtrack/Sozinova_etal/sozinova_etal.csv")
+brunato.results  <- read_csv("https://raw.githubusercontent.com/IWMLC/language-complexity-metrics/master/UDtrack/Brunato_venturi/Brunato-Venturi.csv")
+coltekin.results  <- read_csv("https://raw.githubusercontent.com/IWMLC/language-complexity-metrics/master/UDtrack/Coltekin_rama/coltekin.csv")
+semenuks.results  <- read_csv("https://raw.githubusercontent.com/IWMLC/language-complexity-metrics/master/UDtrack/Semenuks/Semenuks.csv")
+sinnemaki.results  <- read_csv("https://raw.githubusercontent.com/IWMLC/language-complexity-metrics/master/UDtrack/Sinnemaki/Sinnemaki.csv")
+sozinova.results  <- read_csv("https://raw.githubusercontent.com/IWMLC/language-complexity-metrics/master/UDtrack/Sozinova_etal/sozinova_etal.csv")
 ```
 
 Sanity check, look at the number of rows and columns of the data frames.
 ```{r}
 #Track A (should be 49 rows)
-track.a.rows <- c(nrow(gutierrez), nrow(oh))
+track.a.rows <- c(nrow(gutierrez.results), nrow(oh.results))
 print(track.a.rows) # this corresponds to the number of languages
-track.a.cols <- c(ncol(gutierrez), ncol(oh))
+track.a.cols <- c(ncol(gutierrez.results), ncol(oh.results))
 print(track.a.cols) # this is the number of measures per team
 
 #Track B (should be 63 rows)
-track.b.rows <- c(nrow(brunato), nrow(coltekin), nrow(semenuks), nrow(sinnemaki), nrow(sozinova))
+track.b.rows <- c(nrow(brunato.results), nrow(coltekin.results), nrow(semenuks.results), nrow(sinnemaki.results), nrow(sozinova.results))
 print(track.b.rows) # this corresponds to the number of languages
-track.b.cols <- c(ncol(brunato), ncol(coltekin), ncol(semenuks), ncol(sinnemaki), ncol(sozinova))
+track.b.cols <- c(ncol(brunato.results), ncol(coltekin.results), ncol(semenuks.results), ncol(sinnemaki.results), ncol(sozinova.results))
 print(track.b.cols) # this is the number of measures per team
 ```
 
 # Preprocessing
 Put data into a single data frame.
 ```{r}
-track.a <- cbind(gutierrez, oh[, 3:ncol(oh)])
-track.b <- cbind(brunato, coltekin[, 3:ncol(coltekin)], semenuks[, 3:ncol(semenuks)], sinnemaki[, 3:ncol(sinnemaki)], sozinova[, 3:ncol(sozinova)])
+track.a <- cbind(gutierrez.results, oh.results[, 3:ncol(oh.results)])
+track.b <- cbind(brunato.results, coltekin.results[, 3:ncol(coltekin.results)], semenuks.results[, 3:ncol(semenuks.results)], sinnemaki.results[, 3:ncol(sinnemaki.results)], sozinova.results[, 3:ncol(sozinova.results)])
 ```
 
 Check data frames by looking at the first six rows.
@@ -293,7 +294,7 @@ The code below adds labels to the points of plots, which helps with the intepret
 ```{r, fig.width = 5, fig.height = 5, warning = FALSE}
 #track.a <- track.a[track.a$id != "mya", ] # remove the outlier Burmese (mya)
 
-track.a.plot1.detailed <- ggplot(track.a, aes(x = GM_TTR_.fullyparallelised., y = O_WID)) + 
+track.a.plot1.detailed <- ggplot(track.a, aes(x = GM_TTR_fullyparallelised, y = O_WID)) + 
   geom_point(alpha = 0.3) +
   geom_smooth(method = loess, alpha = 0.3) +
   geom_label_repel(data = track.a[track.a$language == "Fijian" | track.a$language == "Sango" | track.a$language == "Vietnamese" | track.a$language == "Vietnamese" | track.a$language == "English" | track.a$language == "Georgian" |  track.a$language == "Russian" | track.a$language == "Swahili" | track.a$language == "Basque" | track.a$language == "Finnish" | track.a$language == "Turkish" | track.a$language == "Korean" | track.a$language == "Kalaallisut" | track.a$language == "Burmese", ],

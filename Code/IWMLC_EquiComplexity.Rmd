@@ -27,16 +27,11 @@ library(rcompanion)
 ## LOAD DATA
 Load results of all participants in the UD track directly from github repo by using the "readr" library.
 ```{r, message = FALSE}
-brunato.url  <- "https://raw.githubusercontent.com/IWMLC/language-complexity-metrics/master/UDtrack/Brunato_venturi/Brunato-Venturi.csv"
-brunato.results <- read_csv(brunato.url)
-coltekin.url  <- "https://raw.githubusercontent.com/IWMLC/language-complexity-metrics/master/UDtrack/Coltekin_rama/coltekin.csv"
-coltekin.results <- read_csv(coltekin.url)
-semenuks.url  <- "https://raw.githubusercontent.com/IWMLC/language-complexity-metrics/master/UDtrack/Semenuks/Semenuks.csv"
-semenuks.results <- read_csv(semenuks.url)
-sinnemaki.url  <- "https://raw.githubusercontent.com/IWMLC/language-complexity-metrics/master/UDtrack/Sinnemaki/Sinnemaki.csv"
-sinnemaki.results <- read_csv(sinnemaki.url)
-sozinova.url  <- "https://raw.githubusercontent.com/IWMLC/language-complexity-metrics/master/UDtrack/Sozinova_etal/sozinova_etal.csv"
-sozinova.results <- read_csv(sozinova.url)
+brunato.results  <- read_csv("https://raw.githubusercontent.com/IWMLC/language-complexity-metrics/master/UDtrack/Brunato_venturi/Brunato-Venturi.csv")
+coltekin.results  <- read_csv("https://raw.githubusercontent.com/IWMLC/language-complexity-metrics/master/UDtrack/Coltekin_rama/coltekin.csv")
+semenuks.results  <- read_csv("https://raw.githubusercontent.com/IWMLC/language-complexity-metrics/master/UDtrack/Semenuks/Semenuks.csv")
+sinnemaki.results  <- read_csv("https://raw.githubusercontent.com/IWMLC/language-complexity-metrics/master/UDtrack/Sinnemaki/Sinnemaki.csv")
+sozinova.results  <- read_csv("https://raw.githubusercontent.com/IWMLC/language-complexity-metrics/master/UDtrack/Sozinova_etal/sozinova_etal.csv")
 ```
 
 ## DATA PRE-PROCESSING
