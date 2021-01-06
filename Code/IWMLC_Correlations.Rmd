@@ -27,9 +27,9 @@ The participants' results are loaded as csv files directly from the github repos
 ```{r, message = FALSE}
 #Track A (Parallel Bible Corpus, PBC)
 gutierrez.results <- read_csv("https://raw.githubusercontent.com/IWMLC/language-complexity-metrics/master/PBCtrack/Gutierrez/Gutierrez.csv")
-colnames(gutierrez.results) <-  sub("\\(", "", colnames(gutierrez.results)) # remove the parentheses in column names
-colnames(gutierrez.results) <-  sub("\\)", "", colnames(gutierrez.results))
-colnames(gutierrez.results) <-  gsub("\\+", ".", colnames(gutierrez.results)) # replace "+" by "."
+colnames(gutierrez.results) <- sub("\\(", "", colnames(gutierrez.results)) # remove the parentheses in column names
+colnames(gutierrez.results) <- sub("\\)", "", colnames(gutierrez.results))
+colnames(gutierrez.results) <- gsub("\\+", ".", colnames(gutierrez.results)) # replace "+" by "."
 oh.results <- read_csv("https://raw.githubusercontent.com/IWMLC/language-complexity-metrics/master/PBCtrack/Oh/oh.csv")
 
 #TRACK B (Universal Dependencies, UD)
