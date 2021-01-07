@@ -1,11 +1,10 @@
 ---
 title: 'IWMLC: Meta-Analyses of Complexity Results'
 author: "Chris Bentz"
-date: "January 06, 2021"
+date: "January 07, 2021"
 output:
   html_document: default
   pdf_document: default
-  word_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -22,6 +21,7 @@ library(ggplot2)
 library(scales)
 library(plyr)
 library(rcompanion)
+library(rstatix)
 ```
 
 ## LOAD DATA
@@ -63,12 +63,18 @@ Transform data frame from wide format to long format (this is necessary for late
 results.long <- gather(results.scaled, key = measure, value = value, BV_n_tokens:SBS_DER)
 ```
 
+Remove rows which contain NAs.
+```{r}
+results.long <- results.long[complete.cases(results.long), ]
+nrow(results.long)
+```
+
 Select particular complexity measures (if needed).
 ```{r}
-selection <- c("BV_n_tokens", "BV_verbal_head_per_sent", "BV_verbal_root_perc","BV_avg_token_per_clause",
-               "BV_avg_links_len", "BV_avg_max_depth", "BV_avg_verb_edges", "BV_avg_subordinate_chain_len",
-               "BV_avg_subordinate_pre", "BV_avg_subordinate_post", "S_idMean", "S_idSD")
-results.long <- results.long[results.long$measure %in% selection, ]
+#selection <- c("BV_n_tokens", "BV_verbal_head_per_sent", "BV_verbal_root_perc","BV_avg_token_per_clause",
+#               "BV_avg_links_len", "BV_avg_max_depth", "BV_avg_verb_edges", "BV_avg_subordinate_chain_len",
+#               "BV_avg_subordinate_pre", "BV_avg_subordinate_post", "S_idMean", "S_idSD")
+#results.long <- results.long[results.long$measure %in% selection, ]
 ```
 
 ## DENSITY DISTRIBUTIONS
@@ -76,9 +82,9 @@ Plot density distributions of complexity measurements by language. Individual me
 
 Get mean, median, and standard deviation values.
 ```{r}
-mu <- ddply(results.long, "language", summarise, grp.mean = mean(value, na.rm = T)) # get mean values for each language 
-med <- ddply(results.long, "language", summarise, grp.median = median(value, na.rm = T)) # get median values for each language
-sdev <- ddply(results.long, "language", summarise, grp.sd = sd(value, na.rm = T)) # get standard deviation values for each language
+mu <- ddply(results.long, "language", summarise, grp.mean = mean(value)) # get mean values for each language 
+med <- ddply(results.long, "language", summarise, grp.median = median(value)) # get median values for each language
+sdev <- ddply(results.long, "language", summarise, grp.sd = sd(value)) # get standard deviation values for each language
 ```
 
 Plot density distributions with indication of median (mean) values.
@@ -95,20 +101,20 @@ density.plot <- ggplot(results.long, aes(x = value)) +
  geom_vline(data = med, aes(xintercept = grp.median),
              linetype = "dashed", color = "red") +
  geom_vline(aes(xintercept = 0), linetype = "dotted") +
- labs(x = "Complexity Value", y = "Density") +
+ labs(x = "Complexity Values", y = "Density") +
  xlim(-3, 3) +
  theme_bw()
 print(density.plot)
 ```
 
 Safe figure to file.
-```{r, fig.width = 12, fig.height = 10}
-#ggsave("Figures/iwmlc_densities.pdf", density.plot, dpi = 300, scale = 1, 
-       #device = cairo_pdf)
+```{r, warning = FALSE}
+ggsave("~/Github/ComplexityMetaAnalyses/Figures/EquiCompl/density_plot.pdf", density.plot, 
+       dpi = 300, scale = 1, width = 12, height = 10, device = cairo_pdf)
 ```
 
 ## STATISTICAL TESTS
-Run statistical tests to assess whether the aggregate complexity distributions for certain pairs of languages differ signficantly from one another. Note that for this sample of 44 languages there are 44*(44-1)/2 = 946 possible pairwise comparisons. We do not attempt to run them all. We here rather manually choose languages for illustration purposes. 
+Run statistical tests to assess whether the aggregate complexity distributions for certain pairs of languages differ signficantly from one another. Note that for this sample of 44 languages there are 44*(44-1)/2 = 946 possible pairwise comparisons. 
 
 # Overview of median values
 Give an overview of languages with highest and lowest median complexity values.
@@ -116,36 +122,85 @@ Give an overview of languages with highest and lowest median complexity values.
 stats.df <- cbind(mu, med[, 2], sdev[, 2])
 colnames(stats.df) <- c("language", "mu", "med", "sdev")
 stats.df.sorted <- stats.df[order(-stats.df$med),]
+# round values to two decimal places,  the "-1" excludes column 1
+stats.df.sorted[, -1] <- round(stats.df.sorted[, -1], 2) 
 print(stats.df.sorted)
 ```
 
-# Select languages
-Select vectors of complexity measurements for particular languages of the results.long data frame.
+Output data frame as csv file.
 ```{r}
-grc.vec <- results.long[results.long$id == "grc_perseus", ]$value
-kor.vec <- results.long[results.long$id == "kor_gsd", ]$value
+write.csv(stats.df.sorted, file = "~/Github/ComplexityMetaAnalyses/Tables/descriptiveStats.csv", row.names = F)
 ```
 
-# Run Wilcoxon tests
-We here use a so-called Wilcoxon signed rank test for two dependent samples. This statistical test assesses whether there is a significant "location shift" in the two distributions of values. This is often associated with differences in the medians (though this is strictly speaking not correct). It is a non-parametric test, i.e. it does not depend on the assumption that the distributions follow a normal distribution. 
+# Normality
+The assumption that the tested data stems from a normally distributed population is often necessary for the mathematical proofs underlying standard statistical techniques. We might apply normality tests to check for this assumption (e.g. Baayen 2008, p. 73), but some statisticians advice against such pre-tests, since they are often too sensitive (MacDonald 2014, p. 133-136, Rasch et al. (2020), p. 67). In fact, Rasch et al. (2020, p. xi) argue based on earlier simulation studies that almost all standard statistical tests are fairly robust against deviations from normality. However, it is still advisable to check for gross deviations from normality in the data. One common way of doing this is quantile-quantile plots. The points should here roughly follow a straight line (Crawley 2007, p. 281).
 
-```{r}
-wilcox.test(grc.vec, kor.vec, paired = T) 
+```{r, fig.width = 3.5, fig.height = 3}
+ggplot(results.long, aes(sample = value)) + 
+  stat_qq()
 ```
 
-# Effect Size
-Statistical significance is only one part of the story. For instance, a difference in complexity values might be statistically significant, but so small that it is negligible for any theorizing. In fact, it is sometimes argued that effect sizes - rather than p-values - should be the aim of statistical inquiry (Cahusac 2020, p. 12-15). An overview of effect size measures per statistical test is given in Patil (2020). In conjunction with the Wilcoxon signed rank test we here use the statistic r (i.e. function wilcoxonPairedR() of the "rcompanion" package). 
-```{r}
-# subset the data frame to contain selected languages only. This is necessary to meet the input structure of the wilcoxonPairedR() function 
-value <- c(grc.vec, kor.vec)
-id <- c(rep("grc_perseus", ncol(results)-2), rep("kor_gsd", ncol(results)-2))
-grc.kor.df <- data.frame(id, value)
+# Statistical tests
+Select a statistical test:
+Standard t-tests can be used to assess significant differences in the means of the pseudo-complexity distributions, if we assume that the underlying population distributions are normal. Wilcoxon tests are a non-parametric alternative, i.e. they do not make assumptions about the underlying population distribution, e.g. normality (Crawley 2007, p. 283; Baayen 2008, p. 77). Since there are some deviations from normality visible in the QQ-Plot above, we here choose a Wilcoxon test. If we supply two data vectors, then by default the command wilcox.test() runs a Wilcoxon rank sum test (for unpaired samples), and with "paired = T" a Wilcoxon signed rank test. Note that while the same measurement procedures were used here across different languages (and corresponding text samples) to assess different types of complexity, there are sometimes NAs in the original data. We thus have to consider the resulting vectors "unpaired". Note that pairwise.wilcox.test() is a function of the R-core stats package which runs multiple tests, i.e. for all groups in the "language" column in our case.
 
-# run the effect size estimations
-wilcoxonPairedR(x = grc.kor.df$value, g = grc.kor.df$id)
+P-value adjustment for multiple comparisons:
+In case of multiple testing, we should account for the fact that the likelihood of finding a significant result by chance increases with the number of statistical tests. One of the most conservative methods to account for this is the so-called Bonferroni correction, i.e. multiplying the p-values with the number of tests. This method assumes that tests are independent of one another (MacDonald 2014, p. 254-260). Since we here run pairwise tests by languages, our tests are not independent (the same language is tested against others multiple times). We therefore apply the so-called Holm-Bonferroni method, which is less conservative. It does not assume independence between tests (see the descriptions in the vignette invoked by the command "?p.adjust()") . 
+```{r, message = F}
+p.values <- pairwise.wilcox.test(jitter(results.long$value), results.long$language, 
+                     paired = F, p.adjust.method = "holm") # we add some random noise here to the value vector with
+# the function jitter(), since we otherwise get warnings due to ties in the data
+p.values
 ```
+
+## Effect Size
+Statistical significance is only one part of the story. For instance, a difference in complexity values might be statistically significant, but so small that it is negligible for any theorizing. In fact, it is sometimes argued that effect sizes - rather than p-values - should be the aim of statistical inquiry (Cahusac 2020, p. 12-15). An overview of effect size measures per statistical test is given in Patil (2020). In conjunction with the Wilcoxon signed rank test we here use the statistic r (i.e. function wilcox_effsize() of the "rstatix" package). 
+```{r}
+effect.sizes <- wilcox_effsize(results.long, value ~ language, paired = F)
+print(effect.sizes)
+```
+
+## Effect Size Heatmap
+Plot a heatmap with effect sizes to get a better overview.
+```{r, fig.width = 20, fig.height = 20}
+effect.sizes.plot <- ggplot(as.data.frame(effect.sizes), aes(group1, group2)) +
+  geom_tile(aes(fill = effsize), color = "white") +
+  scale_fill_gradient2(low = "light blue", mid = "light grey", high = "red", 
+                       midpoint = 0.5, limit = c(0,1)) +
+  geom_text(aes(label = round(effsize, 2))) +
+  labs(x = "", y = "") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+effect.sizes.plot
+```
+
+Safe figure to file.
+```{r, fig.width = 6, fig.height = 5}
+ggsave("~/Github/ComplexityMetaAnalyses/Figures/EquiCompl/effectSize_plot.pdf", effect.sizes.plot, 
+       dpi = 300, scale = 1, width = 20, height = 20, device = cairo_pdf)
+```
+
 # Interpretation: 
+We find very little evidence for systematic differences (i.e. statistically significant differences with moderate to high effect sizes) in the aggregate complexities of the 44 languages investigated here. In fact, there is only one pair of languages out of 946 for which we find a statistically significant location shift in the complexity distributions, and a moderate effect size (0.47): Dutch and Croatian. For the rest of the 945 pairs there is no evidence of a significant and considerable location shift. 
 
+So, given the data, methods, and languages in this meta study, there is overboarding evidence that languages are equi-complex, if different dimensions of complexity are aggregated. 
+
+# References
+Baayen, R. H. (2008). Analyzing linguistic data: A practical introduction using statistics in R. Cambridge University Press.
+
+Cahusac, P. M. B. (2021). Evidence-based statistics. John Wiley & Sons.
+
+Crawley, M. J. (2007). The R book. John Wiley & Sons Ltd.
+
+Ehret, K. and B. Szmrecsanyi (2016). An information-theoretic approach to assess linguistic complexity. In: R. Baechler & G. Seiler (eds.), Complexity, Isolation, and Variation, 71-94. Berlin: de Gruyter.
+
+Kruschke, J. K. (2012). Bayesian estimation supersedes the t test. Journal of Experimental Psychology.
+
+McDonald, J.H. (2014). Handbook of Biological Statistics (3rd ed.). Sparky House Publishing, Baltimore, Maryland. online at http://www.biostathandbook.com
+
+Patil, I. (2020). Test and effect size details. online at https://cran.r-project.org/web/packages/statsExpressions/vignettes/stats_details.html.
+
+Rasch, D., Verdooren, R., and J. Pilz (2020). Applied statistics. Theory and problem solutions with R. John Wiley & Sons Ltd.
 
 
 
