@@ -72,8 +72,8 @@ nrow(results.long)
 Select particular complexity measures (if needed).
 ```{r}
 #selection <- c("BV_n_tokens", "BV_verbal_head_per_sent", "BV_verbal_root_perc","BV_avg_token_per_clause",
-#               "BV_avg_links_len", "BV_avg_max_depth", "BV_avg_verb_edges", "BV_avg_subordinate_chain_len",
-#               "BV_avg_subordinate_pre", "BV_avg_subordinate_post", "S_idMean", "S_idSD")
+#              "BV_avg_links_len", "BV_avg_max_depth", "BV_avg_verb_edges", "BV_avg_subordinate_chain_len",
+#              "BV_avg_subordinate_pre", "BV_avg_subordinate_post", "S_idMean", "S_idSD")
 #results.long <- results.long[results.long$measure %in% selection, ]
 ```
 
