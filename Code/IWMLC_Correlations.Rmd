@@ -1,7 +1,7 @@
 ---
 title: "Correlations Between Complexity Measures"
 author: "Chris Bentz"
-date: "January 5, 2021"
+date: "January 7, 2021"
 output:
   html_document: default
   pdf_document: default
@@ -27,9 +27,11 @@ The participants' results are loaded as csv files directly from the github repos
 ```{r, message = FALSE}
 #Track A (Parallel Bible Corpus, PBC)
 gutierrez.results <- read_csv("https://raw.githubusercontent.com/IWMLC/language-complexity-metrics/master/PBCtrack/Gutierrez/Gutierrez.csv")
-colnames(gutierrez.results) <- sub("\\(", "", colnames(gutierrez.results)) # remove the parentheses in column names
+# remove the parentheses in column names
+colnames(gutierrez.results) <- sub("\\(", "", colnames(gutierrez.results)) 
 colnames(gutierrez.results) <- sub("\\)", "", colnames(gutierrez.results))
-colnames(gutierrez.results) <- gsub("\\+", ".", colnames(gutierrez.results)) # replace "+" by "."
+# replace "+" by "."
+colnames(gutierrez.results) <- gsub("\\+", ".", colnames(gutierrez.results)) 
 oh.results <- read_csv("https://raw.githubusercontent.com/IWMLC/language-complexity-metrics/master/PBCtrack/Oh/oh.csv")
 
 #TRACK B (Universal Dependencies, UD)
@@ -59,7 +61,10 @@ print(track.b.cols) # this is the number of measures per team
 Put data into a single data frame.
 ```{r}
 track.a <- cbind(gutierrez.results, oh.results[, 3:ncol(oh.results)])
-track.b <- cbind(brunato.results, coltekin.results[, 3:ncol(coltekin.results)], semenuks.results[, 3:ncol(semenuks.results)], sinnemaki.results[, 3:ncol(sinnemaki.results)], sozinova.results[, 3:ncol(sozinova.results)])
+track.b <- cbind(brunato.results, coltekin.results[, 3:ncol(coltekin.results)], 
+                 semenuks.results[, 3:ncol(semenuks.results)], 
+                 sinnemaki.results[, 3:ncol(sinnemaki.results)], 
+                 sozinova.results[, 3:ncol(sozinova.results)])
 ```
 
 Check data frames by looking at the first six rows.
@@ -77,7 +82,8 @@ We here plot correlations between selected measures of the respective track (try
 track.a.short <- track.a[, 3:ncol(track.a)]
 
 track.a.plot <- ggpairs(track.a.short, 
-                        lower = list(continuous = wrap("smooth_loess", alpha = 0.3, lwd = 0.5, size = 2)),
+                        lower = list(continuous = wrap("smooth_loess", alpha = 0.3, 
+                                                       lwd = 0.5, size = 2)),
                         upper = list(continuous = wrap('cor', method = "spearman"))) +
                         theme_bw() +
                         theme(axis.text.x = element_text(angle = 90, hjust = 1))
@@ -86,7 +92,8 @@ print(track.a.plot)
 
 Safe plot to file.
 ```{r, warning = FALSE}
-ggsave("~/Github/ComplexityMetaAnalyses/Figures/TrackA/track_a_plot.pdf", track.a.plot, dpi = 300, scale = 1, width = 15, height = 15, device = cairo_pdf)
+ggsave("~/Github/ComplexityMetaAnalyses/Figures/Corrs/TrackA/track_a_plot.pdf", track.a.plot, 
+       dpi = 300, scale = 1, width = 15, height = 15, device = cairo_pdf)
 ```
 
 
@@ -97,7 +104,8 @@ Same for the Track B data. Not all measures are included here (there would be 27
 track.b.short <- track.b[, 3:ncol(track.b)]
 
 track.b.plot <- ggpairs(track.b.short, progress = TRUE,
-                        lower = list(continuous = wrap("smooth_loess", alpha = 0.3, lwd = 0.5, size = 2)),
+                        lower = list(continuous = wrap("smooth_loess", alpha = 0.3, 
+                                                       lwd = 0.5, size = 2)),
                         upper = list(continuous = wrap('cor', method = "spearman")),
                         columns = c("BV_n_tokens", "BV_char_per_tok", "BV_avg_links_len",
                               "BV_avg_max_depth", "CR_inflection_accuracy", "CR_ttr", 
@@ -110,7 +118,8 @@ print(track.b.plot)
 
 Safe plot to file.
 ```{r, warning = FALSE}
-ggsave("~/Github/ComplexityMetaAnalyses/Figures/TrackB/track_b_plot.pdf", track.b.plot, dpi = 300, scale = 1, width = 15, height = 15, device = cairo_pdf)
+ggsave("~/Github/ComplexityMetaAnalyses/Figures/Corrs/TrackB/track_b_plot.pdf", track.b.plot, 
+       dpi = 300, scale = 1, width = 15, height = 15, device = cairo_pdf)
 ```
 
 # Significant Correlations after Bonferroni Correction
@@ -233,7 +242,7 @@ track.a.plot.corrected <- grid.arrange(track.a.plot1, track.a.plot2, track.a.plo
 ```
 
 ```{r, fig.width = 10, fig.height = 7.5, warning = FALSE}
-ggsave("~/Github/ComplexityMetaAnalyses/Figures/TrackA/track_a_plot_corrected.pdf", track.a.plot.corrected, dpi = 300, scale = 1, width = 10, height = 7.5, device = cairo_pdf)
+ggsave("~/Github/ComplexityMetaAnalyses/Figures/Corrs/TrackA/track_a_plot_corrected.pdf", track.a.plot.corrected, dpi = 300, scale = 1, width = 10, height = 7.5, device = cairo_pdf)
 ```
 
 ## TRACK B
@@ -287,7 +296,7 @@ track.b.plot.corrected <- grid.arrange(track.b.plot1, track.b.plot2, track.b.plo
 ```
 
 ```{r, fig.width = 10, fig.height = 7.5, warning = FALSE}
-ggsave("~/Github/ComplexityMetaAnalyses/Figures/TrackB/track_b_plot_corrected.pdf", track.b.plot.corrected, dpi = 300, scale = 1, width = 10, height = 7.5, device = cairo_pdf)
+ggsave("~/Github/ComplexityMetaAnalyses/Figures/Corrs/TrackB/track_b_plot_corrected.pdf", track.b.plot.corrected, dpi = 300, scale = 1, width = 10, height = 7.5, device = cairo_pdf)
 ```
 
 ## Detailed Plots
@@ -313,7 +322,7 @@ track.a.plot1.detailed
 ```
 
 ```{r, warning = FALSE}
-ggsave("~/Github/ComplexityMetaAnalyses/Figures/TrackA/track_a_plot1_detailed.pdf", track.a.plot1.detailed, dpi = 300, scale = 1, width = 5, height = 5, device = cairo_pdf)
+ggsave("~/Github/ComplexityMetaAnalyses/Figures/Corrs/TrackA/track_a_plot1_detailed.pdf", track.a.plot1.detailed, dpi = 300, scale = 1, width = 5, height = 5, device = cairo_pdf)
 ```
 
 Some comments: This plot shows that the Type-Token Ratio (TTR) and the Word Information Density (WID) are highly correlated across the languages of the Parallel Bible Corpus sample. Burmese (mya) is an outlier here with very high TTR and WID. This is an artifact of the writing system, since it does not delimit orthographic words by white spaces, but rather phrases. For Kalaallisut, on the other hand, the result makes sense (if we accept the latinized writing proposed for this language). Some of the low TTR languages include Sango (sag), Fijian (fij), Thai (tha), and Yoruba (yor).   
@@ -338,7 +347,7 @@ track.b.plot1.detailed
 ```
 
 ```{r, fig.width = 10, fig.height = 10, warning = FALSE}
-ggsave("~/Github/ComplexityMetaAnalyses/Figures/TrackB/track_b_plot1_detailed.pdf", track.b.plot1.detailed, dpi = 300, scale = 1, width = 5, height = 5, device = cairo_pdf)
+ggsave("~/Github/ComplexityMetaAnalyses/Figures/Corrs/TrackB/track_b_plot1_detailed.pdf", track.b.plot1.detailed, dpi = 300, scale = 1, width = 5, height = 5, device = cairo_pdf)
 ```
 
 Some comments: This plot shows the correlation between the so-called Mean Size of Morphological Paradigms (MSP), which is defined by CR as "simply the number of word-form types divided by the number of lemma types", and the difference in unigram entropy of word tokens in the original texts and the lemmatized texts (INF) as defined by SBS. It is certainly not unexpected, but reassuring, to see these measure highly correlated. The outlier to the high end Uyghur (uig) is likely *not* an artifact, as this language indeed has many productive morphological paradigms. Other languages to the high end of morphological complexity include Ancient Greek (grc), Classical Latin (lat), Turkish (tur), and Old Church Slavonic (chu). Languages to the low end are Vietnamese (vie), Indonesian (ind), Mandarin Chinese (cmn), and Afrikaans (afr). Note that the very low morphological complexity scores of Korean (kor) are an artifact of the way the Korean data is presented in the UD. Namely, the "lemmas" given for Korean are actually merely morphologically segmented forms rather than inflectionally neutralized forms as for the other languages. Thus, it makes sense that the MSP is exactly 1 and the INF is 0. 
@@ -397,7 +406,7 @@ track.b.plot.negative.corrected <- grid.arrange(track.b.plot1, track.b.plot2, tr
 ```
 
 ```{r, fig.width = 12, fig.height = 8, warning = FALSE}
-ggsave("~/Github/ComplexityMetaAnalyses/Figures/TrackB/track_b_plot_negative_corrected.pdf", track.b.plot.negative.corrected, dpi = 300, scale = 1, width = 12, height = 8, device = cairo_pdf)
+ggsave("~/Github/ComplexityMetaAnalyses/Figures/Corrs/TrackB/track_b_plot_negative_corrected.pdf", track.b.plot.negative.corrected, dpi = 300, scale = 1, width = 12, height = 8, device = cairo_pdf)
 ```
 
 ## Detailed Plots
@@ -419,7 +428,7 @@ track.b.plot1.negative.detailed
 ```
 
 ```{r, fig.width = 10, fig.height = 10, warning = FALSE}
-ggsave("~/Github/ComplexityMetaAnalyses/Figures/TrackB/track_b_plot1_negative_detailed.pdf", track.b.plot1.negative.detailed, dpi = 300, scale = 1, width = 5, height = 5, device = cairo_pdf)
+ggsave("~/Github/ComplexityMetaAnalyses/Figures/Corrs/TrackB/track_b_plot1_negative_detailed.pdf", track.b.plot1.negative.detailed, dpi = 300, scale = 1, width = 5, height = 5, device = cairo_pdf)
 ```
 
 
@@ -442,7 +451,7 @@ track.b.plot2.negative.detailed
 ```
 
 ```{r, fig.width = 10, fig.height = 10, warning = FALSE}
-ggsave("~/Github/ComplexityMetaAnalyses/Figures/TrackB/track_b_plot2_negative_detailed.pdf", track.b.plot2.negative.detailed, dpi = 300, scale = 1, width = 5, height = 5, device = cairo_pdf)
+ggsave("~/Github/ComplexityMetaAnalyses/Figures/Corrs/TrackB/track_b_plot2_negative_detailed.pdf", track.b.plot2.negative.detailed, dpi = 300, scale = 1, width = 5, height = 5, device = cairo_pdf)
 ```
 
 # Conclusions
