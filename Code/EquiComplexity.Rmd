@@ -1,7 +1,7 @@
 ---
-title: 'IWMLC: Meta-Analyses of Complexity Results'
+title: 'Equi-Complexity Analyses'
 author: "Chris Bentz"
-date: "January 07, 2021"
+date: "January 22, 2021"
 output:
   html_document: default
   pdf_document: default
@@ -11,7 +11,16 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## LOAD PACKAGES
+# Session Info
+Give the session info (reduced).
+```{r, echo = F}
+# R version
+sessionInfo()$R.version$version.string
+# platform
+sessionInfo()$R.version$platform 
+```
+
+# Load Packages
 Load packages. If they are not installed yet on your local machine, use install.packages() to install them.
 ```{r, message = FALSE}
 library(readr)
@@ -24,9 +33,25 @@ library(rcompanion)
 library(rstatix)
 ```
 
-## LOAD DATA
+Give the package versions.
+```{r, echo = F}
+# version of packages loaded
+installed.packages()[names(sessionInfo()$otherPkgs), "Version"]
+```
+
+# Load Data
 Load results of all participants in the UD track directly from github repo by using the "readr" library.
 ```{r, message = FALSE}
+#Track A (Parallel Bible Corpus, PBC)
+gutierrez.results <- read_csv("https://raw.githubusercontent.com/IWMLC/language-complexity-metrics/master/PBCtrack/Gutierrez/Gutierrez.csv")
+# remove the parentheses in column names
+colnames(gutierrez.results) <- sub("\\(", "", colnames(gutierrez.results)) 
+colnames(gutierrez.results) <- sub("\\)", "", colnames(gutierrez.results))
+# replace "+" by "."
+colnames(gutierrez.results) <- gsub("\\+", ".", colnames(gutierrez.results)) 
+oh.results <- read_csv("https://raw.githubusercontent.com/IWMLC/language-complexity-metrics/master/PBCtrack/Oh/oh.csv")
+
+#TRACK B (Universal Dependencies, UD)
 brunato.results  <- read_csv("https://raw.githubusercontent.com/IWMLC/language-complexity-metrics/master/UDtrack/Brunato_venturi/Brunato-Venturi.csv")
 coltekin.results  <- read_csv("https://raw.githubusercontent.com/IWMLC/language-complexity-metrics/master/UDtrack/Coltekin_rama/coltekin.csv")
 semenuks.results  <- read_csv("https://raw.githubusercontent.com/IWMLC/language-complexity-metrics/master/UDtrack/Semenuks/Semenuks.csv")
@@ -34,7 +59,7 @@ sinnemaki.results  <- read_csv("https://raw.githubusercontent.com/IWMLC/language
 sozinova.results  <- read_csv("https://raw.githubusercontent.com/IWMLC/language-complexity-metrics/master/UDtrack/Sozinova_etal/sozinova_etal.csv")
 ```
 
-## DATA PRE-PROCESSING
+# Data Pre-Processing
 Create a single data frame merging results together using the Reduce() and merge() functions of base R.
 ```{r}
 results <- Reduce(merge, list(brunato.results, coltekin.results, semenuks.results, sinnemaki.results, sozinova.results)) # by default the merge() function uses columns with the same names to merge on, i.e. "id" and "language" in our case.
@@ -77,7 +102,7 @@ Select particular complexity measures (if needed).
 #results.long <- results.long[results.long$measure %in% selection, ]
 ```
 
-## DENSITY DISTRIBUTIONS
+# Density Distributions
 Plot density distributions of complexity measurements by language. Individual measurements for each complexity measure (and different corpora if available) are plotted as black dots. The central value (0.5) is indicated by a vertical dotted line for visual reference. The median value of complexity measurements per language is indicated as a dashed line.
 
 Get mean, median, and standard deviation values.
@@ -113,10 +138,10 @@ ggsave("~/Github/ComplexityMetaAnalyses/Figures/EquiCompl/density_plot.pdf", den
        dpi = 300, scale = 1, width = 12, height = 10, device = cairo_pdf)
 ```
 
-## STATISTICAL TESTS
+# Statistical Tests
 Run statistical tests to assess whether the aggregate complexity distributions for certain pairs of languages differ signficantly from one another. Note that for this sample of 44 languages there are 44*(44-1)/2 = 946 possible pairwise comparisons. 
 
-# Overview of median values
+## Overview of median values
 Give an overview of languages with highest and lowest median complexity values.
 ```{r}
 stats.df <- cbind(mu, med[, 2], sdev[, 2])
@@ -132,7 +157,7 @@ Output data frame as csv file.
 write.csv(stats.df.sorted, file = "~/Github/ComplexityMetaAnalyses/Tables/descriptiveStats.csv", row.names = F)
 ```
 
-# Normality
+## Normality
 The assumption that the tested data stems from a normally distributed population is often necessary for the mathematical proofs underlying standard statistical techniques. We might apply normality tests to check for this assumption (e.g. Baayen 2008, p. 73), but some statisticians advice against such pre-tests, since they are often too sensitive (MacDonald 2014, p. 133-136, Rasch et al. (2020), p. 67). In fact, Rasch et al. (2020, p. xi) argue based on earlier simulation studies that almost all standard statistical tests are fairly robust against deviations from normality. However, it is still advisable to check for gross deviations from normality in the data. One common way of doing this is quantile-quantile plots. The points should here roughly follow a straight line (Crawley 2007, p. 281).
 
 ```{r, fig.width = 3.5, fig.height = 3}
@@ -140,7 +165,7 @@ ggplot(results.long, aes(sample = value)) +
   stat_qq()
 ```
 
-# Statistical tests
+## Choose statistical tests
 Select a statistical test:
 Standard t-tests can be used to assess significant differences in the means of the pseudo-complexity distributions, if we assume that the underlying population distributions are normal. Wilcoxon tests are a non-parametric alternative, i.e. they do not make assumptions about the underlying population distribution, e.g. normality (Crawley 2007, p. 283; Baayen 2008, p. 77). Since there are some deviations from normality visible in the QQ-Plot above, we here choose a Wilcoxon test. If we supply two data vectors, then by default the command wilcox.test() runs a Wilcoxon rank sum test (for unpaired samples), and with "paired = T" a Wilcoxon signed rank test. Note that while the same measurement procedures were used here across different languages (and corresponding text samples) to assess different types of complexity, there are sometimes NAs in the original data. We thus have to consider the resulting vectors "unpaired". Note that pairwise.wilcox.test() is a function of the R-core stats package which runs multiple tests, i.e. for all groups in the "language" column in our case.
 
@@ -154,7 +179,7 @@ p.values <- pairwise.wilcox.test(jitter(results.long$value), results.long$langua
 p.values
 ```
 
-## Effect Size
+# Effect Size
 Statistical significance is only one part of the story. For instance, a difference in complexity values might be statistically significant, but so small that it is negligible for any theorizing. In fact, it is sometimes argued that effect sizes - rather than p-values - should be the aim of statistical inquiry (Cahusac 2020, p. 12-15). An overview of effect size measures per statistical test is given in Patil (2020). In conjunction with the Wilcoxon signed rank test we here use the statistic r (i.e. function wilcox_effsize() of the "rstatix" package). 
 ```{r}
 effect.sizes <- wilcox_effsize(results.long, value ~ language, paired = F)
@@ -182,7 +207,7 @@ ggsave("~/Github/ComplexityMetaAnalyses/Figures/EquiCompl/effectSize_plot.pdf", 
 ```
 
 # Interpretation: 
-We find very little evidence for systematic differences (i.e. statistically significant differences with moderate to high effect sizes) in the aggregate complexities of the 44 languages investigated here. In fact, there is only one pair of languages out of 946 for which we find a statistically significant location shift in the complexity distributions, and a moderate effect size (0.47): Dutch and Croatian. For the rest of the 945 pairs there is no evidence of a significant and considerable location shift. 
+We find very little evidence for systematic differences (i.e. statistically significant differences with moderate to high effect sizes) in the aggregate complexities of the 44 languages investigated here. In fact, there are only two pairs of languages out of 946 for which we find statistically significant location shifts in the complexity distributions, and moderate effect sizes: Dutch and Croatian, as well as Dutch and Romanian. For the rest of the 945 pairs there is no evidence of a significant and considerable location shift. 
 
 So, given the data, methods, and languages in this meta study, there is overboarding evidence that languages are equi-complex, if different dimensions of complexity are aggregated. 
 
