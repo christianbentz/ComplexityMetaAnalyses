@@ -207,7 +207,7 @@ ggsave("~/Github/ComplexityMetaAnalyses/Figures/EquiCompl/effectSize_plot.pdf", 
 ```
 
 # Interpretation: 
-We find very little evidence for systematic differences (i.e. statistically significant differences with moderate to high effect sizes) in the aggregate complexities of the 44 languages investigated here. In fact, there are only two pairs of languages out of 946 for which we find statistically significant location shifts in the complexity distributions, and moderate effect sizes: Dutch and Croatian, as well as Dutch and Romanian. For the rest of the 945 pairs there is no evidence of a significant and considerable location shift. 
+We find very little evidence for systematic differences (i.e. statistically significant differences with moderate to high effect sizes) in the aggregate complexities of the 44 languages investigated here. In fact, there are only four pairs of languages out of 946 for which we find statistically significant location shifts in the complexity distributions, and moderate effect sizes: Dutch and Croatian, Dutch and Romanian, English and Romanian, Romanian and Norwegian. For the rest of the pairs there is no evidence of a significant and considerable location shift. 
 
 So, given the data, methods, and languages in this meta study, there is overboarding evidence that languages are equi-complex, if different dimensions of complexity are aggregated. 
 
