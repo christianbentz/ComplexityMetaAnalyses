@@ -1,7 +1,7 @@
 ---
 title: 'Equi-Complexity Analyses'
 author: "Chris Bentz"
-date: "January 22, 2021"
+date: "January 27, 2021"
 output:
   html_document: default
   pdf_document: default
@@ -40,17 +40,8 @@ installed.packages()[names(sessionInfo()$otherPkgs), "Version"]
 ```
 
 # Load Data
-Load results of all participants in the UD track directly from github repo by using the "readr" library.
+Load results of all participants in the UD track directly from github repo by using the "readr" library. We here only use Track B as we have measures from different domains (morphology, syntax) in this track, while in Track A we have mainly morphological complexity measures.
 ```{r, message = FALSE}
-#Track A (Parallel Bible Corpus, PBC)
-gutierrez.results <- read_csv("https://raw.githubusercontent.com/IWMLC/language-complexity-metrics/master/PBCtrack/Gutierrez/Gutierrez.csv")
-# remove the parentheses in column names
-colnames(gutierrez.results) <- sub("\\(", "", colnames(gutierrez.results)) 
-colnames(gutierrez.results) <- sub("\\)", "", colnames(gutierrez.results))
-# replace "+" by "."
-colnames(gutierrez.results) <- gsub("\\+", ".", colnames(gutierrez.results)) 
-oh.results <- read_csv("https://raw.githubusercontent.com/IWMLC/language-complexity-metrics/master/PBCtrack/Oh/oh.csv")
-
 #TRACK B (Universal Dependencies, UD)
 brunato.results  <- read_csv("https://raw.githubusercontent.com/IWMLC/language-complexity-metrics/master/UDtrack/Brunato_venturi/Brunato-Venturi.csv")
 coltekin.results  <- read_csv("https://raw.githubusercontent.com/IWMLC/language-complexity-metrics/master/UDtrack/Coltekin_rama/coltekin.csv")
