@@ -50,6 +50,11 @@ sinnemaki.results  <- read_csv("https://raw.githubusercontent.com/IWMLC/language
 sozinova.results  <- read_csv("https://raw.githubusercontent.com/IWMLC/language-complexity-metrics/master/UDtrack/Sozinova_etal/sozinova_etal.csv")
 ```
 
+Load file with meta-information on the measures. This is slightly adapted from a file prepared by Katharina Ehret and Alice Blumenthal-Dramé in the context of the Interactive Workshop on Measuring Language Complexity (IWMLC 2019).  
+```{r}
+meta.info  <- read_csv("https://raw.githubusercontent.com/IWMLC/language-complexity-metrics/master/metaInformation.csv")
+```
+
 # Data Pre-Processing
 Create a single data frame merging results together using the Reduce() and merge() functions of base R.
 ```{r}
@@ -85,12 +90,15 @@ results.long <- results.long[complete.cases(results.long), ]
 nrow(results.long)
 ```
 
-Select particular complexity measures (if needed).
+Add meta-information on complexity measures.
 ```{r}
-#selection <- c("BV_n_tokens", "BV_verbal_head_per_sent", "BV_verbal_root_perc","BV_avg_token_per_clause",
-#              "BV_avg_links_len", "BV_avg_max_depth", "BV_avg_verb_edges", "BV_avg_subordinate_chain_len",
-#              "BV_avg_subordinate_pre", "BV_avg_subordinate_post", "S_idMean", "S_idSD")
-#results.long <- results.long[results.long$measure %in% selection, ]
+results.long <- merge(results.long, meta.info[, 2:3], by = "measure")
+```
+
+Generate data frames for subdomains (morphology, syntax). This can be used for comparison with aggregated results.
+```{r}
+results.morph <- results.long[results.long$domain == "morphology", ]
+results.syntax <- results.long[results.long$domain == "syntax", ]
 ```
 
 # Density Distributions
@@ -98,27 +106,28 @@ Plot density distributions of complexity measurements by language. Individual me
 
 Get mean, median, and standard deviation values.
 ```{r}
-mu <- ddply(results.long, "language", summarise, grp.mean = mean(value)) # get mean values for each language 
-med <- ddply(results.long, "language", summarise, grp.median = median(value)) # get median values for each language
-sdev <- ddply(results.long, "language", summarise, grp.sd = sd(value)) # get standard deviation values for each language
+# get median value for each language
+med <- ddply(results.long, "language", summarise, grp.median = median(value))
+# get mean value for each language
+mu <- ddply(results.long, "language", summarise, grp.mean = mean(value))
+# get standard deviation for each language
+sdev <- ddply(results.long, "language", summarise, grp.sdev = sd(value))
 ```
 
 Plot density distributions with indication of median (mean) values.
 ```{r, fig.width = 12, fig.height = 10}
-density.plot <- ggplot(results.long, aes(x = value)) + 
- #geom_histogram(aes(y = ..density..), colour = "black", fill = "light grey",
-                #binwidth = 0.1) +
- geom_density(alpha = .2, fill = "grey", color = "darkgrey") +
- geom_jitter(data = results.long, aes(x = value, y = 0), 
-             size = 1, height = 0.1, width = 0) +
+density.plot <- ggplot(results.long, aes(x = value, group = domain, 
+                                         fill = domain, color = domain)) + 
+#geom_histogram(aes(y = ..density..), binwidth = 0.3) +
+ geom_density(alpha = 0.3) +
+ geom_jitter(aes(x = value, y = -0.2), 
+             size = 0.5, height = 0.1, width = 0) +
+ geom_vline(aes(xintercept = 0), color = "grey") +
+ geom_vline(data = med, aes(xintercept = grp.median), linetype = "dashed") +
  facet_wrap(~ language) +
- # geom_vline(data = mu, aes(xintercept=grp.mean),
- #           linetype = "dotted") +
- geom_vline(data = med, aes(xintercept = grp.median),
-             linetype = "dashed", color = "red") +
- geom_vline(aes(xintercept = 0), linetype = "dotted") +
  labs(x = "Complexity Values", y = "Density") +
  xlim(-3, 3) +
+ #ylim(0, 1.5) +
  theme_bw()
 print(density.plot)
 ```
@@ -163,22 +172,73 @@ Standard t-tests can be used to assess significant differences in the means of t
 P-value adjustment for multiple comparisons:
 In case of multiple testing, we should account for the fact that the likelihood of finding a significant result by chance increases with the number of statistical tests. One of the most conservative methods to account for this is the so-called Bonferroni correction, i.e. multiplying the p-values with the number of tests. This method is appropriate when tests are independent of one another (MacDonald 2014, p. 254-260). Since we here run pairwise tests by languages, our tests are not independent (the same language is tested against others multiple times). We therefore apply the so-called Holm-Bonferroni method, which is less conservative. It does not assume independence between tests (see the descriptions in the vignette invoked by the command "?p.adjust()").
 
+### Tests for all measures (morphology and syntax)
 ```{r, message = F}
+# we add some random noise here to the value vector with
+# the function jitter(), since we otherwise get warnings due to ties in the data
 p.values <- pairwise.wilcox.test(jitter(results.long$value), results.long$language, 
+                     paired = F, p.adjust.method = "holm") 
+# get dataframe with pairs of languages where p < 0.05
+m <- p.values$p.value
+indices <- which(m < 0.05, arr.ind = T)
+v1 <- rownames(m)[indices[, "row"]]
+v2 <- colnames(m)[indices[, "col"]]
+df <- cbind(v1, v2) 
+print(df)
+```
+
+### Tests for morphological complexity measures
+```{r, message = F}
+p.values.morph <- pairwise.wilcox.test(jitter(results.morph$value), results.morph$language, 
                      paired = F, p.adjust.method = "holm") # we add some random noise here to the value vector with
 # the function jitter(), since we otherwise get warnings due to ties in the data
-p.values
+# get dataframe with pairs of languages where p < 0.05
+m <- p.values.morph$p.value
+indices <- which(m < 0.05, arr.ind = T)
+v1 <- rownames(m)[indices[, "row"]]
+v2 <- colnames(m)[indices[, "col"]]
+df <- cbind(v1, v2)
+print(df)
+```
+
+### Tests for syntactic complexity measures
+```{r, message = F}
+p.values.syntax <- pairwise.wilcox.test(jitter(results.syntax$value), results.syntax$language, 
+                     paired = F, p.adjust.method = "holm") # we add some random noise here to the value vector with
+# the function jitter(), since we otherwise get warnings due to ties in the data
+m <- p.values.syntax$p.value
+indices <- which(m < 0.05, arr.ind = T)
+v1 <- rownames(m)[indices[, "row"]]
+v2 <- colnames(m)[indices[, "col"]]
+df <- cbind(v1, v2)
+print(df)
 ```
 
 # Effect Size
 Statistical significance is only one part of the story. For instance, a difference in complexity values might be statistically significant, but so small that it is negligible for any theorizing. In fact, it is sometimes argued that effect sizes - rather than p-values - should be the aim of statistical inquiry (Cahusac 2020, p. 12-15). An overview of effect size measures per statistical test is given in Patil (2020). In conjunction with the Wilcoxon signed rank test we here use the statistic r (i.e. function wilcox_effsize() of the "rstatix" package). 
+
+### For all measures 
 ```{r}
 effect.sizes <- wilcox_effsize(results.long, value ~ language, paired = F)
-print(effect.sizes)
+#print(effect.sizes)
+```
+
+### For morphology
+```{r}
+effect.sizes.morph <- wilcox_effsize(results.morph, value ~ language, paired = F)
+#print(effect.sizes.morph)
+```
+
+### For syntax
+```{r}
+effect.sizes.syntax <- wilcox_effsize(results.syntax, value ~ language, paired = F)
+#print(effect.sizes.syntax)
 ```
 
 ## Effect Size Heatmap
 Plot a heatmap with effect sizes to get a better overview.
+
+### For all measures
 ```{r, fig.width = 20, fig.height = 20}
 effect.sizes.plot <- ggplot(as.data.frame(effect.sizes), aes(group1, group2)) +
   geom_tile(aes(fill = effsize), color = "white") +
@@ -197,8 +257,34 @@ ggsave("~/Github/ComplexityMetaAnalyses/Figures/EquiCompl/effectSize_plot.pdf", 
        dpi = 300, scale = 1, width = 20, height = 20, device = cairo_pdf)
 ```
 
+### For morphology
+```{r, fig.width = 20, fig.height = 20}
+effect.sizes.plot <- ggplot(as.data.frame(effect.sizes.morph), aes(group1, group2)) +
+  geom_tile(aes(fill = effsize), color = "white") +
+  scale_fill_gradient2(low = "light blue", mid = "light grey", high = "red", 
+                       midpoint = 0.5, limit = c(0,1)) +
+  geom_text(aes(label = round(effsize, 2))) +
+  labs(x = "", y = "") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+effect.sizes.plot
+```
+
+### For syntax
+```{r, fig.width = 20, fig.height = 20}
+effect.sizes.plot <- ggplot(as.data.frame(effect.sizes.syntax), aes(group1, group2)) +
+  geom_tile(aes(fill = effsize), color = "white") +
+  scale_fill_gradient2(low = "light blue", mid = "light grey", high = "red", 
+                       midpoint = 0.5, limit = c(0,1)) +
+  geom_text(aes(label = round(effsize, 2))) +
+  labs(x = "", y = "") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+effect.sizes.plot
+```
+
 # Interpretation: 
-We find very little evidence for systematic differences (i.e. statistically significant differences with moderate to high effect sizes) in the aggregate complexities of the 44 languages investigated here. In fact, there are only four pairs of languages out of 946 for which we find statistically significant location shifts in the complexity distributions, and moderate effect sizes: Dutch and Croatian, Dutch and Romanian, English and Romanian, Romanian and Norwegian. For the rest of the pairs there is no evidence of a significant and considerable location shift. 
+We find very little evidence for systematic differences (i.e. statistically significant differences with moderate to high effect sizes) in the aggregate complexities of the 44 languages investigated here. In fact, there are only four pairs of languages out of 946 for which we find statistically significant location shifts in the overall complexity distributions, and moderate effect sizes: Dutch and Croatian, Dutch and Romanian, English and Romanian, Romanian and Norwegian. For the rest of the pairs there is no evidence of a significant and considerable location shift. 
 
 So, given the data, methods, and languages in this meta study, there is overboarding evidence that languages are equi-complex, if different dimensions of complexity are aggregated. 
 
