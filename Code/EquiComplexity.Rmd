@@ -27,6 +27,7 @@ library(readr)
 library(MASS)
 library(tidyr)
 library(ggplot2)
+library(ggridges)
 library(scales)
 library(plyr)
 library(rcompanion)
@@ -51,7 +52,7 @@ sozinova.results  <- read_csv("https://raw.githubusercontent.com/IWMLC/language-
 ```
 
 Load file with meta-information on the measures. This is slightly adapted from a file prepared by Katharina Ehret and Alice Blumenthal-Dramé in the context of the Interactive Workshop on Measuring Language Complexity (IWMLC 2019).  
-```{r}
+```{r, message = F}
 meta.info  <- read_csv("https://raw.githubusercontent.com/IWMLC/language-complexity-metrics/master/metaInformation.csv")
 ```
 
@@ -116,20 +117,34 @@ sdev <- ddply(results.long, "language", summarise, grp.sdev = sd(value))
 
 Plot density distributions with indication of median (mean) values.
 ```{r, fig.width = 12, fig.height = 10}
-density.plot <- ggplot(results.long, aes(x = value, group = domain, 
-                                         fill = domain, color = domain)) + 
+density.plot <- ggplot(results.long, aes(y = value, x = domain, fill = domain)) + 
 #geom_histogram(aes(y = ..density..), binwidth = 0.3) +
- geom_density(alpha = 0.3) +
- geom_jitter(aes(x = value, y = -0.2), 
-             size = 0.5, height = 0.1, width = 0) +
- geom_vline(aes(xintercept = 0), color = "grey") +
- geom_vline(data = med, aes(xintercept = grp.median), linetype = "dashed") +
+ geom_flat_violin(position = position_nudge(x = .2, y = 0), alpha = .3) +
+ geom_point(aes(y = value, color = domain), 
+             position = position_jitter(width = .15), size = .5, alpha = 0.8) +
+ #geom_density(alpha = 0.3) +
+ #geom_jitter(aes(x = value, y = -0.2), 
+             #size = 0.5, height = 0.1, width = 0) +
+ geom_hline(aes(yintercept = 0), color = "darkgrey", linetype = "dashed") +
+ #geom_vline(data = med, aes(xintercept = grp.median), linetype = "dashed") +
  facet_wrap(~ language) +
  labs(x = "Complexity Values", y = "Density") +
- xlim(-3, 3) +
+ ylim(-3, 3) +
  #ylim(0, 1.5) +
+ coord_flip() +
  theme_bw()
 print(density.plot)
+
+# ggplot(results.long, aes(x = value, y = domain, fill = domain)) +
+#   geom_density_ridges(alpha = 0.3) +
+#   theme_ridges() +
+#   geom_jitter(aes(x = value, y = -0.2), 
+#              size = 0.5, height = 0.1, width = 0) +
+#   geom_vline(aes(xintercept = 0), color = "grey") +
+#   geom_vline(data = med, aes(xintercept = grp.median), linetype = "dashed") +
+#   facet_wrap(~language) +
+#   xlim(-3, 3) +
+#   theme(legend.position = "none")
 ```
 
 Safe figure to file.
