@@ -103,48 +103,29 @@ results.syntax <- results.long[results.long$domain == "syntax", ]
 ```
 
 # Density Distributions
-Plot density distributions of complexity measurements by language. Individual measurements for each complexity measure (and different corpora if available) are plotted as black dots. The central value (0.5) is indicated by a vertical dotted line for visual reference. The median value of complexity measurements per language is indicated as a dashed line.
+Plot density distributions of complexity measurements by language. Individual measurements for each complexity measure (and different corpora if available) are plotted as black dots. The central value (0) is indicated by a vertical dotted line for visual reference. The median value of complexity measurements per language is indicated as a dashed line.
 
-Get mean, median, and standard deviation values.
+Create data frame with both domains + "overall", this is necessary for the plots below.
 ```{r}
-# get median value for each language
-med <- ddply(results.long, "language", summarise, grp.median = median(value))
-# get mean value for each language
-mu <- ddply(results.long, "language", summarise, grp.mean = mean(value))
-# get standard deviation for each language
-sdev <- ddply(results.long, "language", summarise, grp.sdev = sd(value))
+results.overall <- results.long
+results.overall$domain <- rep("overall", times = nrow(results.long)) 
+results.plot <- rbind(results.overall, results.long)
 ```
 
 Plot density distributions with indication of median (mean) values.
-```{r, fig.width = 12, fig.height = 10}
-density.plot <- ggplot(results.long, aes(y = value, x = domain, fill = domain)) + 
-#geom_histogram(aes(y = ..density..), binwidth = 0.3) +
- geom_flat_violin(position = position_nudge(x = .2, y = 0), alpha = .3) +
- geom_point(aes(y = value, color = domain), 
-             position = position_jitter(width = .15), size = .5, alpha = 0.8) +
- #geom_density(alpha = 0.3) +
- #geom_jitter(aes(x = value, y = -0.2), 
-             #size = 0.5, height = 0.1, width = 0) +
- geom_hline(aes(yintercept = 0), color = "darkgrey", linetype = "dashed") +
- #geom_vline(data = med, aes(xintercept = grp.median), linetype = "dashed") +
- facet_wrap(~ language) +
- labs(x = "Complexity Values", y = "Density") +
- ylim(-3, 3) +
- #ylim(0, 1.5) +
- coord_flip() +
- theme_bw()
+```{r, fig.width = 12, fig.height = 10, message = F}
+density.plot <- ggplot(results.plot, aes(x = value, y = domain, fill = domain)) +
+  geom_vline(aes(xintercept = 0), color = "darkgrey", linetype = "dashed") +
+  stat_density_ridges(quantile_lines = TRUE, quantiles = 0.5,
+                      rel_min_height = 0.01, scale = 0.6, alpha = 0.5,
+                      jittered_points = TRUE, point_shape = "|", point_size = 2,
+                      size = 0.25, position = position_points_jitter(height = 0)) +
+  #geom_vline(data = med, aes(xintercept = grp.median), linetype = "dashed") +
+  facet_wrap(~language) +
+  xlim(-3, 3) +
+  theme_bw() +
+  theme(legend.position = "none") 
 print(density.plot)
-
-# ggplot(results.long, aes(x = value, y = domain, fill = domain)) +
-#   geom_density_ridges(alpha = 0.3) +
-#   theme_ridges() +
-#   geom_jitter(aes(x = value, y = -0.2), 
-#              size = 0.5, height = 0.1, width = 0) +
-#   geom_vline(aes(xintercept = 0), color = "grey") +
-#   geom_vline(data = med, aes(xintercept = grp.median), linetype = "dashed") +
-#   facet_wrap(~language) +
-#   xlim(-3, 3) +
-#   theme(legend.position = "none")
 ```
 
 Safe figure to file.
@@ -157,6 +138,16 @@ ggsave("~/Github/ComplexityMetaAnalyses/Figures/EquiCompl/density_plot.pdf", den
 Run statistical tests to assess whether the aggregate complexity distributions for certain pairs of languages differ signficantly from one another. Note that for this sample of 44 languages there are 44*(44-1)/2 = 946 possible pairwise comparisons. 
 
 ## Overview of median values
+Get mean, median, and standard deviation values.
+```{r}
+# get median value for each language
+med <- ddply(results.long, "language", summarise, grp.median = median(value))
+# get mean value for each language
+mu <- ddply(results.long, "language", summarise, grp.mean = mean(value))
+# get standard deviation for each language
+sdev <- ddply(results.long, "language", summarise, grp.sdev = sd(value))
+```
+
 Give an overview of languages with highest and lowest median complexity values.
 ```{r}
 stats.df <- cbind(mu, med[, 2], sdev[, 2])
