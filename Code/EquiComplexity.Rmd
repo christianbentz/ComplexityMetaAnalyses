@@ -1,7 +1,7 @@
 ---
 title: 'Equi-Complexity Analyses'
 author: "Chris Bentz"
-date: "February 2, 2021"
+date: "February 3, 2021"
 output:
   html_document: default
   pdf_document: default
@@ -123,6 +123,7 @@ density.plot <- ggplot(results.plot, aes(x = value, y = domain, fill = domain)) 
   #geom_vline(data = med, aes(xintercept = grp.median), linetype = "dashed") +
   facet_wrap(~ language) +
   xlim(-5, 5) +
+  labs(x = "Complexity Value", y = "Density") +
   theme_bw() +
   theme(legend.position = "none") 
 print(density.plot)
