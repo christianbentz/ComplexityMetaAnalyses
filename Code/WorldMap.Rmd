@@ -1,7 +1,7 @@
 ---
 title: "World Map"
 author: "Chris Bentz"
-date: "February 2, 2021"
+date: "February 3, 2021"
 output: html_document
 ---
 
@@ -24,6 +24,7 @@ If the libraries are not installed yet, you need to install them using, for exam
 library(readr)
 library(ggmap)
 library(maps)
+library(gridExtra)
 ```
 
 Give the package versions.
@@ -33,32 +34,51 @@ installed.packages()[names(sessionInfo()$otherPkgs), "Version"]
 ```
 
 # Load the Data 
-Load Glottolog (Version 4.1) language information, and information on the language sample of the IWMLC.
-```{r}
-glotto <- read_csv("https://raw.githubusercontent.com/christianbentz/ComplexityMetaAnalyses/main/languages_and_dialects_geo.csv")
-# Track A
-oh.results <- read_csv("https://raw.githubusercontent.com/IWMLC/language-complexity-metrics/master/PBCtrack/Oh/oh.csv")
-# Track B
+Load Glottolog (Version 4.1) language information combined with information on the language sample of the IWMLC.
+```{r, message = F}
+languages <- as.data.frame(read_csv("https://raw.githubusercontent.com/IWMLC/language-complexity-metrics/master/languages_metaInfo.csv"))
 ```
 
-A world map with top-level family information from Glottolog.
+# Simple Stats
 ```{r}
+length(unique(languages$isocodes)) # number of languages according to iso: 79
+length(unique(languages$glottocode)) # number of languages according to glottolog: 79
+unique(languages$macroarea) # macroareas: 6
+```
+
+# Pre-Processing
+```{r}
+# remove Norwegian Nynorsk (nno) since this has NAs in glottolog
+languages <- languages[languages$isocodes != "nno", ]
+```
+
+# World Map
+World maps with macroarea information from Glottolog.
+```{r, fig.width = 8, fig.height = 8, warning = FALSE}
+# create world map
 world <- map_data("world")
-family_map <- ggplot() + 
+area.map <- ggplot() + 
   geom_polygon(data = world, aes(x = long, y = lat, group = group), 
-               fill = "grey90", col = "grey") +
-  geom_point(data = lang100, aes(x = longitude_glotto, y = latitude_glotto, colour = top_level_family), 
-             alpha = 0.8, size = 3) +
+               fill = "white", colour = "darkgrey") +
+  geom_point(data = languages, aes(x = longitude, y = latitude, 
+                                 fill = macroarea), 
+             alpha = 0.9, size = 3, pch = 21) +
   scale_y_continuous(limits = c(-65, 80)) +
   scale_x_continuous(breaks = c(-180, -90, 0, 90, 180)) +
-  geom_hline(aes(yintercept = 0), colour = "grey", size = 1, linetype = 2) +
-  labs(x = "longitude", y = "latitude", color = "Language family") +
-  ggtitle("Top-level family information from Glottolog") +
+  labs(x = "longitude", y = "latitude", fill = "Language Area") +
   theme_bw() +
+  facet_wrap (~ corpus, nrow = 2) +
   theme(axis.title.x = element_text(size = 12),
         axis.title.y = element_text(size = 12),
         title = element_text(size = 12),
         legend.title = element_text(size = 12),
         legend.text = element_text(size = 12),
         legend.position = "bottom")
-family_map
+area.map
+```
+
+Safe to file.
+```{r, warning = FALSE}
+ggsave("~/Github/ComplexityMetaAnalyses/Figures/WorldMap/worldMaps.pdf", area.map, 
+       dpi = 300, scale = 1, width = 8, height = 8, device = cairo_pdf)
+```
