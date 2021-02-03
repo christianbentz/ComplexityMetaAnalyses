@@ -1,5 +1,5 @@
 ---
-title: "World Map"
+title: "World Maps"
 author: "Chris Bentz"
 date: "February 3, 2021"
 output: html_document
