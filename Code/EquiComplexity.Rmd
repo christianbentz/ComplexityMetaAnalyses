@@ -53,7 +53,7 @@ sozinova.results  <- read_csv("https://raw.githubusercontent.com/IWMLC/language-
 
 Load file with meta-information on the measures. This is slightly adapted from a file prepared by Katharina Ehret and Alice Blumenthal-Dramé in the context of the Interactive Workshop on Measuring Language Complexity (IWMLC 2019).  
 ```{r, message = F}
-meta.info  <- read_csv("https://raw.githubusercontent.com/IWMLC/language-complexity-metrics/master/metaInformation.csv")
+meta.info  <- read_csv("https://raw.githubusercontent.com/IWMLC/language-complexity-metrics/master/measures_metaInfo.csv")
 ```
 
 # Data Pre-Processing
