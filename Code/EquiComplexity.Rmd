@@ -30,7 +30,6 @@ library(ggplot2)
 library(ggridges)
 library(scales)
 library(plyr)
-library(rcompanion)
 library(rstatix)
 ```
 
@@ -165,8 +164,7 @@ write.csv(stats.df.sorted, file = "~/Github/ComplexityMetaAnalyses/Tables/descri
 ```
 
 ## Normality
-The assumption that the tested data stems from a normally distributed population is often necessary for the mathematical proofs underlying standard statistical techniques. We might apply normality tests to check for this assumption (e.g. Baayen 2008, p. 73), but some statisticians advice against such pre-tests, since they are often too sensitive (MacDonald 2014, p. 133-136, Rasch et al. (2020), p. 67). In fact, Rasch et al. (2020, p. xi) argue based on earlier simulation studies that almost all standard statistical tests are fairly robust against deviations from normality. However, it is still advisable to check for gross deviations from normality in the data. One common way of doing this is quantile-quantile plots. The points should here roughly follow a straight line (Crawley 2007, p. 281).
-
+Check normality of data points by QQ-plot.
 ```{r, fig.width = 3.5, fig.height = 3}
 ggplot(results.long, aes(sample = value)) + 
   stat_qq()
@@ -174,7 +172,7 @@ ggplot(results.long, aes(sample = value)) +
 
 ## Choose statistical tests
 Select a statistical test:
-Standard t-tests can be used to assess significant differences in the means of the pseudo-complexity distributions, if we assume that the underlying population distributions are normal. Wilcoxon tests are a non-parametric alternative, i.e. they do not make assumptions about the underlying population distribution, e.g. normality (Crawley 2007, p. 283; Baayen 2008, p. 77). Since there are some deviations from normality visible in the QQ-Plot above, we here choose a Wilcoxon test. If we supply two data vectors, then by default the command wilcox.test() runs a Wilcoxon rank sum test (for unpaired samples), and with "paired = T" a Wilcoxon signed rank test. Note that while the same measurement procedures were used here across different languages (and corresponding text samples) to assess different types of complexity, there are sometimes NAs in the original data. We thus have to consider the resulting vectors "unpaired". Note that pairwise.wilcox.test() is a function of the R-core stats package which runs multiple tests, i.e. for all groups in the "language" column in our case.
+Since there are some deviations from normality visible in the QQ-Plot above, we here choose a Wilcoxon test. If we supply two data vectors, then by default the command wilcox.test() runs a Wilcoxon rank sum test (for unpaired samples), and with "paired = T" a Wilcoxon signed rank test. Note that while the same measurement procedures were used here across different languages (and corresponding text samples) to assess different types of complexity, there are sometimes NAs in the original data. We thus have to consider the resulting vectors "unpaired". Note that pairwise.wilcox.test() is a function of the R-core stats package which runs multiple tests, i.e. for all groups in the "language" column in our case.
 
 P-value adjustment for multiple comparisons:
 In case of multiple testing, we should account for the fact that the likelihood of finding a significant result by chance increases with the number of statistical tests. One of the most conservative methods to account for this is the so-called Bonferroni correction, i.e. multiplying the p-values with the number of tests. This method is appropriate when tests are independent of one another (MacDonald 2014, p. 254-260). Since we here run pairwise tests by languages, our tests are not independent (the same language is tested against others multiple times). We therefore apply the so-called Holm-Bonferroni method, which is less conservative. It does not assume independence between tests (see the descriptions in the vignette invoked by the command "?p.adjust()").
