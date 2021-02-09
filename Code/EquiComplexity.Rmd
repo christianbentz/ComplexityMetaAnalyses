@@ -1,7 +1,7 @@
 ---
 title: 'Equi-Complexity Analyses'
 author: "Chris Bentz"
-date: "February 3, 2021"
+date: "February 9, 2021"
 output:
   html_document: default
   pdf_document: default
@@ -79,6 +79,12 @@ Center and scale all numerical columns to make them more comparable.
 results.scaled <- cbind(results[1:2], scale(results[3:29])) # add meta-information columns again
 ```
 
+Remove certain measures. To include all measures, this code can just be commented out. In Track B, some measures given by the same team have strong positive correlations, e.g. the number of tokens in a sentence (BV_n_tokens) and the average number of tokens per clause (BV_avg_token_per_clause). We hence just keep one of the strongly correlated measures to not inflate the number of correlated data points.  Also there are measures with many NAs in Track B, i.e. "SI_double_dl", "SI_head_dl", "SI_zero_dl", which are removed here. 
+```{r}
+# Remove measures in Track B
+results.scaled <- results.scaled[ , -which(names(results.scaled) %in% c("BV_avg_max_depth","BV_avg_token_per_clause","SI_double_dl", "SI_head_dl", "SI_zero_dl"))]
+```
+
 Transform data frame from wide format to long format (this is necessary for later plotting and analyses by columns rather than rows).
 ```{r}
 results.long <- gather(results.scaled, key = measure, value = value, BV_n_tokens:SBS_DER)
@@ -128,7 +134,7 @@ density.plot <- ggplot(results.plot, aes(x = value, y = domain, fill = domain)) 
 print(density.plot)
 ```
 
-Safe figure to file.
+Save figure to file.
 ```{r, warning = F, message = F}
 ggsave("~/Github/ComplexityMetaAnalyses/Figures/EquiCompl/density_plot.pdf", density.plot, 
        dpi = 300, scale = 1, width = 12, height = 10, device = cairo_pdf)
@@ -256,7 +262,7 @@ effect.sizes.plot <- ggplot(as.data.frame(effect.sizes), aes(group1, group2)) +
 effect.sizes.plot
 ```
 
-Safe figure to file.
+Save figure to file.
 ```{r, fig.width = 6, fig.height = 5}
 #ggsave("~/Github/ComplexityMetaAnalyses/Figures/EquiCompl/effectSize_plot.pdf", effect.sizes.plot, 
 #       dpi = 300, scale = 1, width = 20, height = 20, device = cairo_pdf)
@@ -289,9 +295,9 @@ effect.sizes.plot
 ```
 
 # Interpretation: 
-We find very little evidence for systematic differences (i.e. statistically significant differences with moderate to high effect sizes) in the aggregate complexities of the 44 languages investigated here. In fact, there are only three pairs of languages out of 946 for which we find statistically significant location shifts in the overall complexity distributions, and moderate effect sizes: Dutch and Romanian, English and Romanian, Romanian and Norwegian. For the rest of the pairs there is no evidence of a significant and considerable location shift. 
+We find very little evidence for systematic differences (i.e. statistically significant differences with moderate to high effect sizes) in the aggregate complexities of the 44 languages investigated here. In fact, there are only five pairs of languages out of 946 for which we find statistically significant location shifts in the overall complexity distributions. These mostly involve Ancient Greek compared to modern day languages (English, Dutch, Norwegian, and Italian). A further significant difference we find between English and Romanian. While these results certainly depend on the number of data points (i.e. measurements) available per language, it is clearly visible in the effect size matrices, that for morphology and syntax separately we find sometimes considerable differences, while for the aggregated measures there are generally lower effect sizes. 
 
-So, given the data, methods, and languages in this meta study, there is overboarding evidence that languages are equi-complex, if different dimensions of complexity are aggregated. 
+So, given the data, methods, and languages in this meta study, there is strong evidence that languages have a tendency to be equi-complex, if different dimensions of complexity are aggregated. 
 
 # References
 Baayen, R. H. (2008). Analyzing linguistic data: A practical introduction using statistics in R. Cambridge University Press.

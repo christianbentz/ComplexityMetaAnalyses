@@ -1,7 +1,7 @@
 ---
 title: "Simulation Study"
 author: "Chris Bentz"
-date: "February 5, 2021"
+date: "February 9, 2021"
 output: html_document
 ---
 
@@ -124,14 +124,14 @@ scatterplot <- ggplot(simulation.df.short, aes(x = langA, y = langB)) +
 scatterplot
 ```
 
-Safe figure to file.
+Save figure to file.
 ```{r, fig.width = 7, fig.height = 2.5}
 #ggsave("Figures/Simulation/scatterplot.pdf", density.plot, dpi = 300, scale = 1, 
 #       device = cairo_pdf)
 ```
 
 ## Normality
-The assumption that the tested data stems from a normally distributed population is often necessary for the mathematical proofs underlying standard statistical techniques. We might apply normality tests to check for this assumption (e.g. Baayen 2008, p. 73), but some statisticians advice against such pre-tests, since they are often too sensitive (MacDonald 2014, p. 133-136, Rasch et al. (2020), p. 67). In fact, Rasch et al. (2020, p. xi) argue based on earlier simulation studies that almost all standard statistical tests are fairly robust against deviations from normality. However, it is still advisable to check for gross deviations from normality in the data. One common way of doing this is quantile-quantile plots. The points should here roughly follow a straight line (Crawley 2007, p. 281).
+The assumption that the tested data stems from a normally distributed population is often necessary for the mathematical proofs underlying standard statistical techniques. We might apply normality tests to check for this assumption (e.g. Baayen 2008, p. 73), but some statisticians advise against such pre-tests, since they are often too sensitive (MacDonald 2014, p. 133-136, Rasch et al. (2020), p. 67). In fact, Rasch et al. (2020, p. xi) argue based on earlier simulation studies that almost all standard statistical tests are fairly robust against deviations from normality. However, it is still advisable to check for gross deviations from normality in the data. One common way of doing this is quantile-quantile plots. The points should here roughly follow a straight line (Crawley 2007, p. 281).
 
 ```{r, fig.width = 3.5, fig.height = 3}
 ggplot(simulation.df.long, aes(sample = value)) + 

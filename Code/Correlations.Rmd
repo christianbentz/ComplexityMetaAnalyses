@@ -1,7 +1,7 @@
 ---
 title: "Correlations Between Complexity Measures"
 author: "Chris Bentz"
-date: "February 4, 2021"
+date: "February 9, 2021"
 output:
   html_document: default
   pdf_document: default
@@ -85,7 +85,7 @@ track.b <- cbind(brunato.results, coltekin.results[, 3:ncol(coltekin.results)],
                  sozinova.results[, 3:ncol(sozinova.results)])
 ```
 
-Remove certain measures. To include all measures, this code can just be commented out. Note, however, that there are certain measures in Track A which are redundant in the sense that they only differ in whether the Bible texts are fully parallelized or not. Also there are measures with many NAs in Track B, i.e. "SI_double_dl", "SI_head_dl", "SI_zero_dl". 
+Remove certain measures. To include all measures, this code can just be commented out. Note, however, that there are certain measures in Track A which are redundant in the sense that they only differ in whether the Bible texts are fully parallelized or not. In Track B, some measures given by the same team have strong positive correlations, e.g. the number of tokens in a sentence (BV_n_tokens) and the average number of tokens per clause (BV_avg_token_per_clause). We hence just keep one of the strongly correlated measures to not inflate the number of correlated data points.  Also there are measures with many NAs in Track B, i.e. "SI_double_dl", "SI_head_dl", "SI_zero_dl", which are removed here. 
 ```{r}
 # Remove measures in Track A
 track.a <- track.a[ , -which(names(track.a) %in% c("GM_H1gram", "GM_H3gram", "GM_TTR",
@@ -93,7 +93,7 @@ track.a <- track.a[ , -which(names(track.a) %in% c("GM_H1gram", "GM_H3gram", "GM
                                                    "GM_TTR.H1_fullyparallelised", "GM_TTR.H3_fullyparallelised",
                                                    "GM_TTR.H1.H3_fullyparallelised"))]
 # Remove measures in Track B
-track.b <- track.b[ , -which(names(track.b) %in% c("SI_double_dl", "SI_head_dl", "SI_zero_dl"))]
+track.b <- track.b[ , -which(names(track.b) %in% c("BV_avg_max_depth","BV_avg_token_per_clause","SI_double_dl", "SI_head_dl", "SI_zero_dl"))]
 ```
 
 Invert the values (by substracting them from 1) for the measure "CR_inflection_accurracy" in Track B. Note that higher values in the original measure mean *lower* rather than higher complexity.
@@ -142,7 +142,7 @@ track.b.scatterplot <- ggpairs(track.b.short, progress = TRUE,
                                                        lwd = 0.5, size = 2)),
                         upper = list(continuous = wrap('cor', method = "spearman")),
                         columns = c("BV_n_tokens", "BV_char_per_tok", "BV_avg_links_len",
-                              "BV_avg_max_depth", "CR_inflection_accuracy", "CR_ttr", 
+                                    "CR_inflection_accuracy", "CR_ttr", 
                               "S_idMean", "S_idSD", "SI_dm", "SI_hm", "SI_dep_dl", 
                               "SBS_INF", "SBS_DER")) +
                         theme_bw() +
@@ -163,7 +163,7 @@ cor.results.a <- corr.test(track.a.short, method = "spearman",
 Give correlogram of selected measures.
 ```{r, fig.width = 5.5, fig.height = 5.5, message = F}
 correlogram.TrackA <- ggcorrplot(cor.results.a$r, p.mat = cor.results.a$p, type = "lower",
-     outline.col = "white", colors = c("#AE3C3C", "white", "#3C77AE"),
+     outline.col = "white", colors = c("#3C77AE", "white", "#AE3C3C"),
      lab = T, insig = "pch")
 correlogram.TrackA
 ```
@@ -181,7 +181,7 @@ cor.results.b <- corr.test(track.b.short, method = "spearman",
                          use = "pairwise.complete.obs", adjust = "holm")
 # produce correlogram
 correlogram.TrackB <- ggcorrplot(cor.results.b$r, p.mat = cor.results.b$p, type = "lower",
-     outline.col = "white", colors = c("#AE3C3C", "white", "#3C77AE"),
+     outline.col = "white", colors = c("#3C77AE", "white", "#AE3C3C"),
      lab = T, insig = "pch")
 correlogram.TrackB
 ```
@@ -292,9 +292,10 @@ ggsave("~/Github/ComplexityMetaAnalyses/Figures/Corrs/scatterplots.pdf", scatter
 Some more general observations based on these analyses include:
 
 - Many of the measures proposed by the same participants highly correlate. This is the case, for instance, for the measures proposed by GM in Track A, but also measures of BV in Track B. In the case of GM, this is because many of the measures are virtually the same, but with minor shades of modification. In the case of BV, while at first sight the measures seem to conceptually differ, they essentially boil down to the same underlying causes. For example, the number of tokens in a sentence highly predicts the average maximal depth of a tree over the sentence. So, arguably most of these positive intra-participant correlations are driven by redundancy in the proposed measures. 
+
 - There are several strong positive correlations between simple measures relating to the number of types and tokens (GM_TTR_fullyparallelised, BV_n_tokens, etc.), and measures of information density (O_WID, S_idSD). Interestingly, this is the case for both tracks, since Oh used the Bible texts, and Semenuks used the UD. Information density is generally assumed to be a measure which has psycholinguistic relevance in terms of language processing. However, the fact that it is highly predictable by some of the simplest word frequency measures (TTR) potentially goes to show that the underlying principles driving complexity are fairly similar.    
 
-- We have mainly discussed positive correlations here, meaning that certain measures are essentially (better or worse) replacements of other measures. In fact, the majority of correlations still significant after the Bonferroni correction are positive (in Track A all of them are positive, in Track B 37 out of 49 are positive). Some of the negative correlations we do find are between CR's "inflection accuracy" and different measures of inflectional complexity (CR_mfe, SBS_INF, CR_msp). This makes perfect sense given that inflection accuracy is a measure that reflects the difficulty of NLP tools to automatically deal with inflectional morphology. The more complex the morphology, the lower the accuracy of the automated tool. A negative correlation that seems both robust and potentially interesting is that the dependency lengths in noun phrases with marked possessives (SI_dep_dl) apparently are in a clear trade-off with different measures of inflectional complexity. However, the fact that there are few such instances of robust negative correlations between measures of different domains suggests that there are relatively few clear complexity trade-offs. This is sth. to further think about.    
+- A negative correlation which seems robust in Track A is found between syllable information density (O_SID) and measures of lexical diversity like TTR (although there are few data points in O_SID). This is potential evidence for a trade-off between syllable complexity and word complexity reported also in earlier studies. A negative correlation in Track B which seems both robust and potentially interesting is that the dependency lengths in noun phrases with marked possessives (SI_dep_dl) apparently are in an inverse relationship with different measures of inflectional complexity.  
 
 # References
 McDonald, J.H. (2014). Handbook of Biological Statistics (3rd ed.). Sparky House Publishing, Baltimore, Maryland. online at http://www.biostathandbook.com

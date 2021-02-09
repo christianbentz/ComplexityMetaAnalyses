@@ -1,7 +1,7 @@
 ---
 title: "World Maps"
 author: "Chris Bentz"
-date: "February 3, 2021"
+date: "February 9, 2021"
 output: html_document
 ---
 
@@ -77,7 +77,7 @@ area.map <- ggplot() +
 area.map
 ```
 
-Safe to file.
+Save to file.
 ```{r, warning = FALSE}
 ggsave("~/Github/ComplexityMetaAnalyses/Figures/WorldMap/worldMaps.pdf", area.map, 
        dpi = 300, scale = 1, width = 8, height = 8, device = cairo_pdf)
