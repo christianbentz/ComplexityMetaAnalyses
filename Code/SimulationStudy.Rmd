@@ -33,18 +33,21 @@ installed.packages()[names(sessionInfo()$otherPkgs), "Version"]
 ```
 
 # Generate Correlated Data
+We here generate correlated pseudo-complexity measurements for two languages A and B. We then apply linear and non-linear transformations to illustrate how this impacts the results of correlation and mean value analyses. 
 ```{r}
 # set the seed for random number generation in order to get the same result when the code is re-run
 set.seed(1)
 # set parameters
-n = 100 # number of datapoints
-r = -0.8 # predefined correlation
+n = 20 # number of datapoints
+r = -0.7 # predefined correlation
 # generate the data
-data <- mvrnorm(n = n, mu = c(0, 0), Sigma = matrix(c(1, r, r, 1), nrow = 2), empirical = TRUE)
-langA <- data[, 1]  
-langB <- data[, 2] 
-# apply non-linear transformation
-langB <- c(langB[1:80], abs(langB[81:100]*5)) 
+data <- mvrnorm(n = n, mu = c(3, 3), Sigma = matrix(c(1, r, r, 1), nrow = 2), empirical = TRUE)
+langA <- data[, 1]
+langB <- data[, 2]
+# apply linear transformation to language B measures
+langB.lt <- langB*2 
+# apply non-linear transformation to language B measures
+langB.nt <- sqrt(langB)
 ```
 
 Center and scale the data.
@@ -100,7 +103,7 @@ density.plot <- ggplot(simulation.df.long, aes(x = value)) +
   geom_vline(aes(xintercept = 0), color = "darkgrey") +
   geom_vline(data = med, aes(xintercept = grp.median), linetype = "dashed") +
   facet_wrap(~ language) +
-  xlim(-3, 3) +
+  #xlim(-3, 3) +
   labs(x = "Complexity Value", y = "Density") +
   theme_bw() +
   theme(legend.position = "none") 
@@ -114,7 +117,7 @@ scatterplot <- ggplot(simulation.df.short, aes(x = langA, y = langB)) +
   geom_point(alpha = 0.3) +
   geom_smooth(method = loess, alpha = 0.3) +
   #geom_smooth(method = lm, alpha = 0.3) +
-  ggtitle("b) Pearson r = - 0.8, Spearman rho = -0.76") +
+  ggtitle("") +
   xlab("Complexity Value (Language A)") +
   ylab("Complexity Value (Language B)") +
   theme(legend.position = "none")
