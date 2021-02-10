@@ -1,0 +1,164 @@
+---
+title: "Simulation Study"
+author: "Chris Bentz"
+date: "February 10, 2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Session Info
+Give the session info (reduced).
+```{r, echo = F}
+# R version
+sessionInfo()$R.version$version.string
+# platform
+sessionInfo()$R.version$platform 
+```
+
+# Load Libraries
+If the libraries are not installed yet, you need to install them using, for example, the command: install.packages("ggplot2").
+```{r, message = FALSE}
+library(MASS)
+library(ggplot2)
+library(plyr)
+```
+
+Give the package versions.
+```{r, echo = F}
+# version of packages loaded
+installed.packages()[names(sessionInfo()$otherPkgs), "Version"]
+```
+
+# Generate Correlated Data
+We here generate correlated pseudo-complexity measurements for two languages A and B. We then apply linear and non-linear transformations to illustrate how this impacts the results of correlation and mean value analyses. 
+```{r}
+# set the seed for random number generation in order to get the same result when the code is re-run
+set.seed(1)
+# set parameters
+n = 20 # number of datapoints
+r = -0.7 # predefined correlation
+# generate the data
+data <- mvrnorm(n = n, mu = c(3, 3), Sigma = matrix(c(1, r, r, 1), nrow = 2), empirical = TRUE)
+langA <- data[, 1]
+langB <- data[, 2]
+# apply linear transformation to language B measures
+langB.lt <- langB*2 
+# apply non-linear transformation to language B measures
+langB.nt <- sqrt(langB)
+```
+
+Center and scale the data.
+```{r}
+langA <- scale(langA)
+langB <- scale(langB)
+```
+
+# Compute Correlation Coefficients and Significance
+```{r}
+# check correlations
+cor(langA, langB, method = "pearson")
+cor(langA, langB, method = "spearman")
+# check significance
+cor.test(langA, langB, method = "pearson")
+cor.test(langA, langB, method = "spearman")
+```
+
+Put into short format (for scatterplots) and long format data frame (density distributions).
+```{r}
+# short format
+simulation.df.short <- data.frame(langA, langB)
+# long format
+value <- c(langA, langB) 
+measurement <- rep(c(1:n), times = 2)
+language <- c(rep("Language A", times = n), rep("Language B", times = n))
+simulation.df.long <- data.frame(language, measurement, value)
+head(simulation.df.long)
+```
+
+# Visualization
+
+## Density Distributions
+Plot density distributions of complexity pseudo-measurements by language. Individual values for each complexity pseudo-measurement are plotted as black dots. The central value (0) is indicated by a vertical dotted line for visual reference. The median and mean values of complexity pseudo-measurements per language might also be indicated.
+
+Get mean, median, and standard deviation values.
+```{r}
+# get mean values for each language
+mu <- ddply(simulation.df.long, "language", summarise, grp.mean = mean(value, na.rm = T))
+# get median values for each language
+med <- ddply(simulation.df.long, "language", summarise, grp.median = median(value, na.rm = T))
+# get standard deviation values for each language
+sdev <- ddply(simulation.df.long, "language", summarise, grp.sd = sd(value, na.rm = T)) 
+```
+
+Plot density distributions with indication of median (mean) values.
+```{r, fig.width = 5, fig.height = 2.5}
+density.plot <- ggplot(simulation.df.long, aes(x = value)) +
+ geom_density(alpha = .2, fill = "grey", color = "darkgrey") +
+ geom_jitter(data = simulation.df.long, aes(x = value, y = 0), 
+             size = 1, height = 0.03, width = 0) + # add some jitter to prevent overplotting
+  geom_vline(aes(xintercept = 0), color = "darkgrey") +
+  geom_vline(data = med, aes(xintercept = grp.median), linetype = "dashed") +
+  facet_wrap(~ language) +
+  #xlim(-3, 3) +
+  labs(x = "Complexity Value", y = "Density") +
+  theme_bw() +
+  theme(legend.position = "none") 
+print(density.plot)
+```
+
+## Scatterplot
+Create a scatterplot to visualise the correlation.
+```{r, fig.width = 4, fig.height = 4, warning = FALSE}
+scatterplot <- ggplot(simulation.df.short, aes(x = langA, y = langB)) + 
+  geom_point(alpha = 0.3) +
+  geom_smooth(method = loess, alpha = 0.3) +
+  #geom_smooth(method = lm, alpha = 0.3) +
+  ggtitle("") +
+  xlab("Complexity Value (Language A)") +
+  ylab("Complexity Value (Language B)") +
+  theme(legend.position = "none")
+scatterplot
+```
+
+Save figure to file.
+```{r, fig.width = 7, fig.height = 2.5}
+#ggsave("Figures/Simulation/scatterplot.pdf", density.plot, dpi = 300, scale = 1, 
+#       device = cairo_pdf)
+```
+
+## Normality
+The assumption that the tested data stems from a normally distributed population is often necessary for the mathematical proofs underlying standard statistical techniques. We might apply normality tests to check for this assumption (e.g. Baayen 2008, p. 73), but some statisticians advise against such pre-tests, since they are often too sensitive (MacDonald 2014, p. 133-136, Rasch et al. (2020), p. 67). In fact, Rasch et al. (2020, p. xi) argue based on earlier simulation studies that almost all standard statistical tests are fairly robust against deviations from normality. However, it is still advisable to check for gross deviations from normality in the data. One common way of doing this is quantile-quantile plots. The points should here roughly follow a straight line (Crawley 2007, p. 281).
+
+```{r, fig.width = 3.5, fig.height = 3}
+ggplot(simulation.df.long, aes(sample = value)) + 
+  stat_qq()
+```
+
+## Choose statistical tests
+Select a statistical test:
+Standard t-tests can be used to assess significant differences in the means of the pseudo-complexity distributions, if we assume that the underlying population distributions are normal. Wilcoxon tests are a non-parametric alternative, i.e. they do not make assumptions about the underlying population distribution, e.g. normality (Crawley 2007, p. 283; Baayen 2008, p. 77). 
+
+Run a t-test.
+```{r}
+t.test(simulation.df.short$langA, simulation.df.short$langB, paired = T) 
+```
+
+# References
+Baayen, R. H. (2008). Analyzing linguistic data: A practical introduction using statistics in R. Cambridge University Press.
+
+Cahusac, P. M. B. (2021). Evidence-based statistics. John Wiley & Sons.
+
+Crawley, M. J. (2007). The R book. John Wiley & Sons Ltd.
+
+Ehret, K. and B. Szmrecsanyi (2016). An information-theoretic approach to assess linguistic complexity. In: R. Baechler & G. Seiler (eds.), Complexity, Isolation, and Variation, 71-94. Berlin: de Gruyter.
+
+Kruschke, J. K. (2012). Bayesian estimation supersedes the t test. Journal of Experimental Psychology.
+
+McDonald, J.H. (2014). Handbook of Biological Statistics (3rd ed.). Sparky House Publishing, Baltimore, Maryland. online at http://www.biostathandbook.com
+
+Patil, I. (2020). Test and effect size details. online at https://cran.r-project.org/web/packages/statsExpressions/vignettes/stats_details.html.
+
+Rasch, D., Verdooren, R., and J. Pilz (2020). Applied statistics. Theory and problem solutions with R. John Wiley & Sons Ltd.
