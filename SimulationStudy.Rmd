@@ -94,7 +94,7 @@ head(simulation.df.long.stand)
 ```
 
 # Scatterplot with Correlations
-```{r, fig.width = 10, fig.height = 10, messages = FALSE, warnings = FALSE}
+```{r, fig.width = 10, fig.height = 10, messages = FALSE, warning = FALSE}
 simulation.scatterplot <- ggpairs(simulation.df.short, 
                         lower = list(continuous = wrap("smooth_loess", alpha = 0.3, 
                                                        lwd = 0.5, size = 2))) +
@@ -107,6 +107,7 @@ print(simulation.scatterplot)
 # Density Distributions
 Plot density distributions of complexity pseudo-measurements by language. Individual values for each complexity pseudo-measurement are plotted as black dots. The central value (0) is indicated by a vertical dotted line for visual reference. The median and mean values of complexity pseudo-measurements per language might also be indicated.
 
+## Non-Standardized Vectors
 Get mean, median, and standard deviation values.
 ```{r}
 # get mean values for each language
@@ -118,10 +119,37 @@ sdev <- ddply(simulation.df.long, "language", summarise, grp.sd = sd(value, na.r
 ```
 
 Plot density distributions with indication of median (mean) values.
-```{r, fig.width = 9, fig.height = 5}
+```{r, fig.width = 6, fig.height = 4}
 density.plot <- ggplot(simulation.df.long, aes(x = value)) +
  geom_density(alpha = .2, fill = "grey", color = "darkgrey") +
  geom_jitter(data = simulation.df.long, aes(x = value, y = 0), 
+             size = 1, height = 0.03, width = 0) + # add some jitter to prevent overplotting
+  geom_vline(aes(xintercept = 3), color = "darkgrey") +
+  geom_vline(data = med, aes(xintercept = grp.median), linetype = "dashed") +
+  facet_wrap(~ language) +
+  #xlim(-3, 3) +
+  labs(x = "Complexity Value", y = "Density") +
+  theme_bw() +
+  theme(legend.position = "none") 
+print(density.plot)
+```
+
+## Standardized Vectors
+Get mean, median, and standard deviation values.
+```{r}
+# get mean values for each language
+mu <- ddply(simulation.df.long.stand, "language", summarise, grp.mean = mean(value, na.rm = T))
+# get median values for each language
+med <- ddply(simulation.df.long.stand, "language", summarise, grp.median = median(value, na.rm = T))
+# get standard deviation values for each language
+sdev <- ddply(simulation.df.long.stand, "language", summarise, grp.sd = sd(value, na.rm = T)) 
+```
+
+Plot density distributions with indication of median (mean) values.
+```{r, fig.width = 6, fig.height = 4}
+density.plot.stand <- ggplot(simulation.df.long.stand, aes(x = value)) +
+ geom_density(alpha = .2, fill = "grey", color = "darkgrey") +
+ geom_jitter(data = simulation.df.long.stand, aes(x = value, y = 0), 
              size = 1, height = 0.03, width = 0) + # add some jitter to prevent overplotting
   geom_vline(aes(xintercept = 0), color = "darkgrey") +
   geom_vline(data = med, aes(xintercept = grp.median), linetype = "dashed") +
@@ -130,7 +158,7 @@ density.plot <- ggplot(simulation.df.long, aes(x = value)) +
   labs(x = "Complexity Value", y = "Density") +
   theme_bw() +
   theme(legend.position = "none") 
-print(density.plot)
+print(density.plot.stand)
 ```
 
 Save figure to file.
@@ -173,7 +201,7 @@ effect.sizes.stand <- wilcox_effsize(simulation.df.long.stand, value ~ language,
 
 # Effect Size Heatmap
 Plot a heatmap with effect sizes to get a better overview.
-```{r, fig.width = 4, fig.height = 3}
+```{r, fig.width = 4.2, fig.height = 2.8}
 # non-standardized
 effect.sizes.plot <- ggplot(as.data.frame(effect.sizes), aes(group1, group2)) +
   geom_tile(aes(fill = effsize), color = "white") +
@@ -182,11 +210,12 @@ effect.sizes.plot <- ggplot(as.data.frame(effect.sizes), aes(group1, group2)) +
   geom_text(aes(label = round(effsize, 2))) +
   labs(x = "", y = "") +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 effect.sizes.plot
 ```
-# standardized
-```{r, fig.width = 10, fig.height = 6}
+
+For the standardized vectors.
+```{r, fig.width = 5, fig.height = 3.6}
 effect.sizes.plot.stand <- ggplot(as.data.frame(effect.sizes.stand), aes(group1, group2)) +
   geom_tile(aes(fill = effsize), color = "white") +
   scale_fill_gradient2(low = "light blue", mid = "light grey", high = "red", 
@@ -194,7 +223,7 @@ effect.sizes.plot.stand <- ggplot(as.data.frame(effect.sizes.stand), aes(group1,
   geom_text(aes(label = round(effsize, 2))) +
   labs(x = "", y = "") +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 effect.sizes.plot.stand
 ```
 
