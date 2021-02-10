@@ -1,8 +1,10 @@
 ---
 title: "Simulation Study"
-author: "Chris Bentz"
+author: ''
 date: "February 10, 2021"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -24,6 +26,8 @@ If the libraries are not installed yet, you need to install them using, for exam
 library(MASS)
 library(ggplot2)
 library(plyr)
+library(GGally)
+library(rstatix)
 ```
 
 Give the package versions.
@@ -35,52 +39,72 @@ installed.packages()[names(sessionInfo()$otherPkgs), "Version"]
 # Generate Correlated Data
 We here generate correlated pseudo-complexity measurements for two languages A and B. We then apply linear and non-linear transformations to illustrate how this impacts the results of correlation and mean value analyses. 
 ```{r}
-# set the seed for random number generation in order to get the same result when the code is re-run
+# set the seed for random number generation in order to 
+# get the same result when the code is re-run
 set.seed(1)
 # set parameters
 n = 20 # number of datapoints
 r = -0.7 # predefined correlation
+a = 2 # constant for linear transformation
 # generate the data
-data <- mvrnorm(n = n, mu = c(3, 3), Sigma = matrix(c(1, r, r, 1), nrow = 2), empirical = TRUE)
+data <- mvrnorm(n = n, mu = c(3, 3), Sigma = matrix(c(1, r, r, 1), nrow = 2), 
+                empirical = TRUE)
 langA <- data[, 1]
 langB <- data[, 2]
 # apply linear transformation to language B measures
-langB.lt <- langB*2 
+langB.lt <- langB*a
 # apply non-linear transformation to language B measures
 langB.nt <- sqrt(langB)
 ```
 
-Center and scale the data.
+Standardize the data by centering and scaling it.
 ```{r}
-langA <- scale(langA)
-langB <- scale(langB)
-```
-
-# Compute Correlation Coefficients and Significance
-```{r}
-# check correlations
-cor(langA, langB, method = "pearson")
-cor(langA, langB, method = "spearman")
-# check significance
-cor.test(langA, langB, method = "pearson")
-cor.test(langA, langB, method = "spearman")
+langA.stand <- scale(langA)
+langB.stand <- scale(langB)
+langB.lt.stand <- scale(langB.lt)
+langB.nt.stand <- scale(langB.nt)
 ```
 
 Put into short format (for scatterplots) and long format data frame (density distributions).
 ```{r}
 # short format
-simulation.df.short <- data.frame(langA, langB)
+simulation.df.short <- data.frame(langA, langB, langB.lt, langB.nt, langA.stand, langB.stand, 
+                                  langB.lt.stand, langB.nt.stand)
 # long format
-value <- c(langA, langB) 
-measurement <- rep(c(1:n), times = 2)
-language <- c(rep("Language A", times = n), rep("Language B", times = n))
+# non-standardized
+value <- c(langA, langB, langB.lt, langB.nt)
+measurement <- rep(c(1:n), times = 4)
+language <- c(rep("Language A", times = n), 
+              rep("Language B", times = n),
+              rep("Language B (linear trans.)", times = n), 
+              rep("Language B (non-linear trans.)", times = n)
+              )
 simulation.df.long <- data.frame(language, measurement, value)
 head(simulation.df.long)
+# standardized
+value <- c(langA.stand, langB.stand, langB.lt.stand, langB.nt.stand)
+measurement <- rep(c(1:n), times = 4)
+language <- c(rep("Language A (standardized)", times = n), 
+              rep("Language B (standardized)", times = n),
+              rep("Language B (linear trans., standardized)", times = n),
+              rep("Language B (non-linear trans., standardized)", times = n)
+              )
+simulation.df.long.stand <- data.frame(language, measurement, value)
+head(simulation.df.long.stand)
 ```
 
-# Visualization
+# Scatterplot with Correlations
+```{r, fig.width = 10, fig.height = 10, messages = FALSE, warnings = FALSE}
+simulation.scatterplot <- ggpairs(simulation.df.short, 
+                        lower = list(continuous = wrap("smooth_loess", alpha = 0.3, 
+                                                       lwd = 0.5, size = 2))) +
+                        #upper = list(continuous = wrap('cor', method = "spearman"))) +
+                        theme_bw() +
+                        theme(axis.text.x = element_text(angle = 90, hjust = 1))
+print(simulation.scatterplot)
+```
 
-## Density Distributions
+# Density Distributions
 Plot density distributions of complexity pseudo-measurements by language. Individual values for each complexity pseudo-measurement are plotted as black dots. The central value (0) is indicated by a vertical dotted line for visual reference. The median and mean values of complexity pseudo-measurements per language might also be indicated.
 
 Get mean, median, and standard deviation values.
@@ -94,7 +118,7 @@ sdev <- ddply(simulation.df.long, "language", summarise, grp.sd = sd(value, na.r
 ```
 
 Plot density distributions with indication of median (mean) values.
-```{r, fig.width = 5, fig.height = 2.5}
+```{r, fig.width = 9, fig.height = 5}
 density.plot <- ggplot(simulation.df.long, aes(x = value)) +
  geom_density(alpha = .2, fill = "grey", color = "darkgrey") +
  geom_jitter(data = simulation.df.long, aes(x = value, y = 0), 
@@ -107,20 +131,6 @@ density.plot <- ggplot(simulation.df.long, aes(x = value)) +
   theme_bw() +
   theme(legend.position = "none") 
 print(density.plot)
-```
-
-## Scatterplot
-Create a scatterplot to visualise the correlation.
-```{r, fig.width = 4, fig.height = 4, warning = FALSE}
-scatterplot <- ggplot(simulation.df.short, aes(x = langA, y = langB)) + 
-  geom_point(alpha = 0.3) +
-  geom_smooth(method = loess, alpha = 0.3) +
-  #geom_smooth(method = lm, alpha = 0.3) +
-  ggtitle("") +
-  xlab("Complexity Value (Language A)") +
-  ylab("Complexity Value (Language B)") +
-  theme(legend.position = "none")
-scatterplot
 ```
 
 Save figure to file.
@@ -141,9 +151,51 @@ ggplot(simulation.df.long, aes(sample = value)) +
 Select a statistical test:
 Standard t-tests can be used to assess significant differences in the means of the pseudo-complexity distributions, if we assume that the underlying population distributions are normal. Wilcoxon tests are a non-parametric alternative, i.e. they do not make assumptions about the underlying population distribution, e.g. normality (Crawley 2007, p. 283; Baayen 2008, p. 77). 
 
-Run a t-test.
+Run pairwise Wilcoxon tests.
+```{r, message = F}
+# we add some random noise here to the value vector with
+# the function jitter(), since we otherwise get warnings due to ties in the data
+p.values <- pairwise.wilcox.test(jitter(simulation.df.long$value), simulation.df.long$language, 
+                     paired = F, p.adjust.method = "holm") 
+p.values$p.value
+```
+
+# Effect Size
+Statistical significance is only one part of the story. For instance, a difference in complexity values might be statistically significant, but so small that it is negligible for any theorizing. In fact, it is sometimes argued that effect sizes - rather than p-values - should be the aim of statistical inquiry (Cahusac 2020, p. 12-15). An overview of effect size measures per statistical test is given in Patil (2020). In conjunction with the Wilcoxon signed rank test we here use the statistic r (i.e. function wilcox_effsize() of the "rstatix" package). 
+
 ```{r}
-t.test(simulation.df.short$langA, simulation.df.short$langB, paired = T) 
+# non-standardized
+effect.sizes <- wilcox_effsize(simulation.df.long, value ~ language, paired = F)
+# standardized
+effect.sizes.stand <- wilcox_effsize(simulation.df.long.stand, value ~ language, paired = F)
+#print(effect.sizes)
+```
+
+# Effect Size Heatmap
+Plot a heatmap with effect sizes to get a better overview.
+```{r, fig.width = 4, fig.height = 3}
+# non-standardized
+effect.sizes.plot <- ggplot(as.data.frame(effect.sizes), aes(group1, group2)) +
+  geom_tile(aes(fill = effsize), color = "white") +
+  scale_fill_gradient2(low = "light blue", mid = "light grey", high = "red", 
+                       midpoint = 0.5, limit = c(0,1)) +
+  geom_text(aes(label = round(effsize, 2))) +
+  labs(x = "", y = "") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+effect.sizes.plot
+```
+# standardized
+```{r, fig.width = 10, fig.height = 6}
+effect.sizes.plot.stand <- ggplot(as.data.frame(effect.sizes.stand), aes(group1, group2)) +
+  geom_tile(aes(fill = effsize), color = "white") +
+  scale_fill_gradient2(low = "light blue", mid = "light grey", high = "red", 
+                       midpoint = 0.5, limit = c(0,1)) +
+  geom_text(aes(label = round(effsize, 2))) +
+  labs(x = "", y = "") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+effect.sizes.plot.stand
 ```
 
 # References

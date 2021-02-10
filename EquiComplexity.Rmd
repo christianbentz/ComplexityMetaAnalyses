@@ -1,10 +1,10 @@
 ---
 title: 'Equi-Complexity Analyses'
-author: "Chris Bentz"
+author: ""
 date: "February 10, 2021"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -58,7 +58,10 @@ meta.info  <- read_csv("https://raw.githubusercontent.com/IWMLC/language-complex
 # Data Pre-Processing
 Create a single data frame merging results together using the Reduce() and merge() functions of base R.
 ```{r}
-results <- Reduce(merge, list(brunato.results, coltekin.results, semenuks.results, sinnemaki.results, sozinova.results)) # by default the merge() function uses columns with the same names to merge on, i.e. "id" and "language" in our case.
+# by default the merge() function uses columns with the same names 
+# to merge on, i.e. "id" and "language" in our case.
+results <- Reduce(merge, list(brunato.results, coltekin.results, semenuks.results, 
+                              sinnemaki.results, sozinova.results)) 
 ```
 
 Give some simple statistics for this data frame of results.
@@ -76,13 +79,16 @@ results$CR_inflection_accuracy <- 1-results$CR_inflection_accuracy
 
 Center and scale all numerical columns to make them more comparable.
 ```{r}
-results.scaled <- cbind(results[1:2], scale(results[3:29])) # add meta-information columns again
+# scale and add meta-information columns again
+results.scaled <- cbind(results[1:2], scale(results[3:29])) 
 ```
 
 Remove certain measures. To include all measures, this code can just be commented out. In Track B, some measures given by the same team have strong positive correlations, e.g. the number of tokens in a sentence (BV_n_tokens) and the average number of tokens per clause (BV_avg_token_per_clause). We hence just keep one of the strongly correlated measures to not inflate the number of correlated data points.  Also there are measures with many NAs in Track B, i.e. "SI_double_dl", "SI_head_dl", "SI_zero_dl", which are removed here. 
 ```{r}
 # Remove measures in Track B
-results.scaled <- results.scaled[ , -which(names(results.scaled) %in% c("BV_avg_max_depth","BV_avg_token_per_clause","SI_double_dl", "SI_head_dl", "SI_zero_dl"))]
+results.scaled <- results.scaled[ , -which(names(results.scaled) %in% 
+                                             c("BV_avg_max_depth","BV_avg_token_per_clause",
+                                               "SI_double_dl", "SI_head_dl", "SI_zero_dl"))]
 ```
 
 Transform data frame from wide format to long format (this is necessary for later plotting and analyses by columns rather than rows).
@@ -166,7 +172,7 @@ print(stats.df.sorted)
 
 Output data frame as csv file.
 ```{r}
-write.csv(stats.df.sorted, file = "~/Github/ComplexityMetaAnalyses/Tables/descriptiveStats.csv", row.names = F)
+write.csv(stats.df.sorted, file = "Tables/descriptiveStats.csv", row.names = F)
 ```
 
 ## Normality
@@ -201,7 +207,8 @@ print(df)
 ### Tests for morphological complexity measures
 ```{r, message = F}
 p.values.morph <- pairwise.wilcox.test(jitter(results.morph$value), results.morph$language, 
-                     paired = F, p.adjust.method = "holm") # we add some random noise here to the value vector with
+                     paired = F, p.adjust.method = "holm") 
+# we add some random noise here to the value vector with
 # the function jitter(), since we otherwise get warnings due to ties in the data
 # get dataframe with pairs of languages where p < 0.05
 m <- p.values.morph$p.value
@@ -215,7 +222,8 @@ print(df)
 ### Tests for syntactic complexity measures
 ```{r, message = F}
 p.values.syntax <- pairwise.wilcox.test(jitter(results.syntax$value), results.syntax$language, 
-                     paired = F, p.adjust.method = "holm") # we add some random noise here to the value vector with
+                     paired = F, p.adjust.method = "holm") 
+# we add some random noise here to the value vector with
 # the function jitter(), since we otherwise get warnings due to ties in the data
 m <- p.values.syntax$p.value
 indices <- which(m < 0.05, arr.ind = T)
@@ -300,22 +308,10 @@ We find very little evidence for systematic differences (i.e. statistically sign
 So, given the data, methods, and languages in this meta study, there is strong evidence that languages have a tendency to be equi-complex, if different dimensions of complexity are aggregated. 
 
 # References
-Baayen, R. H. (2008). Analyzing linguistic data: A practical introduction using statistics in R. Cambridge University Press.
-
 Cahusac, P. M. B. (2021). Evidence-based statistics. John Wiley & Sons.
-
-Crawley, M. J. (2007). The R book. John Wiley & Sons Ltd.
-
-Ehret, K. and B. Szmrecsanyi (2016). An information-theoretic approach to assess linguistic complexity. In: R. Baechler & G. Seiler (eds.), Complexity, Isolation, and Variation, 71-94. Berlin: de Gruyter.
-
-Kruschke, J. K. (2012). Bayesian estimation supersedes the t test. Journal of Experimental Psychology.
 
 McDonald, J.H. (2014). Handbook of Biological Statistics (3rd ed.). Sparky House Publishing, Baltimore, Maryland. online at http://www.biostathandbook.com
 
 Patil, I. (2020). Test and effect size details. online at https://cran.r-project.org/web/packages/statsExpressions/vignettes/stats_details.html.
-
-Rasch, D., Verdooren, R., and J. Pilz (2020). Applied statistics. Theory and problem solutions with R. John Wiley & Sons Ltd.
-
-
 
 

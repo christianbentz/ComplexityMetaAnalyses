@@ -1,10 +1,10 @@
 ---
 title: "Correlations Between Complexity Measures"
-author: "Chris Bentz"
+author: ""
 date: "February 10, 2021"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -51,11 +51,11 @@ colnames(gutierrez.results) <- gsub("\\+", ".", colnames(gutierrez.results))
 oh.results <- read_csv("https://raw.githubusercontent.com/IWMLC/language-complexity-metrics/master/PBCtrack/Oh/oh.csv")
 
 #TRACK B (Universal Dependencies, UD)
-brunato.results  <- read_csv("https://raw.githubusercontent.com/IWMLC/language-complexity-metrics/master/UDtrack/Brunato_venturi/Brunato-Venturi.csv")
-coltekin.results  <- read_csv("https://raw.githubusercontent.com/IWMLC/language-complexity-metrics/master/UDtrack/Coltekin_rama/coltekin.csv")
-semenuks.results  <- read_csv("https://raw.githubusercontent.com/IWMLC/language-complexity-metrics/master/UDtrack/Semenuks/Semenuks.csv")
-sinnemaki.results  <- read_csv("https://raw.githubusercontent.com/IWMLC/language-complexity-metrics/master/UDtrack/Sinnemaki/Sinnemaki.csv")
-sozinova.results  <- read_csv("https://raw.githubusercontent.com/IWMLC/language-complexity-metrics/master/UDtrack/Sozinova_etal/sozinova_etal.csv")
+brunato.results <- read_csv("https://raw.githubusercontent.com/IWMLC/language-complexity-metrics/master/UDtrack/Brunato_venturi/Brunato-Venturi.csv")
+coltekin.results <- read_csv("https://raw.githubusercontent.com/IWMLC/language-complexity-metrics/master/UDtrack/Coltekin_rama/coltekin.csv")
+semenuks.results <- read_csv("https://raw.githubusercontent.com/IWMLC/language-complexity-metrics/master/UDtrack/Semenuks/Semenuks.csv")
+sinnemaki.results <- read_csv("https://raw.githubusercontent.com/IWMLC/language-complexity-metrics/master/UDtrack/Sinnemaki/Sinnemaki.csv")
+sozinova.results <- read_csv("https://raw.githubusercontent.com/IWMLC/language-complexity-metrics/master/UDtrack/Sozinova_etal/sozinova_etal.csv")
 ```
 
 Sanity check, look at the number of rows and columns of the data frames.
@@ -68,10 +68,12 @@ print(track.a.cols) # this is the number of measures per team
 
 #Track B (should be 63 rows)
 track.b.rows <- c(nrow(brunato.results), nrow(coltekin.results), 
-                  nrow(semenuks.results), nrow(sinnemaki.results), nrow(sozinova.results))
+                  nrow(semenuks.results), nrow(sinnemaki.results), 
+                  nrow(sozinova.results))
 print(track.b.rows) # this corresponds to the number of languages
 track.b.cols <- c(ncol(brunato.results)-2, ncol(coltekin.results)-2, 
-                  ncol(semenuks.results)-2, ncol(sinnemaki.results)-2, ncol(sozinova.results)-2)
+                  ncol(semenuks.results)-2, ncol(sinnemaki.results)-2, 
+                  ncol(sozinova.results)-2)
 print(track.b.cols) # this is the number of measures per team
 ```
 
@@ -90,10 +92,14 @@ Remove certain measures. To include all measures, this code can just be commente
 # Remove measures in Track A
 track.a <- track.a[ , -which(names(track.a) %in% c("GM_H1gram", "GM_H3gram", "GM_TTR",
                                                    "GM_TTR.H1", "GM_TTR.H3", "GM_TTR.H1.H3",
-                                                   "GM_TTR.H1_fullyparallelised", "GM_TTR.H3_fullyparallelised",
+                                                   "GM_TTR.H1_fullyparallelised", 
+                                                   "GM_TTR.H3_fullyparallelised",
                                                    "GM_TTR.H1.H3_fullyparallelised"))]
 # Remove measures in Track B
-track.b <- track.b[ , -which(names(track.b) %in% c("BV_avg_max_depth","BV_avg_token_per_clause","SI_double_dl", "SI_head_dl", "SI_zero_dl"))]
+track.b <- track.b[ , -which(names(track.b) %in% c("BV_avg_max_depth",
+                                                   "BV_avg_token_per_clause",
+                                                   "SI_double_dl", "SI_head_dl", 
+                                                   "SI_zero_dl"))]
 ```
 
 Invert the values (by substracting them from 1) for the measure "CR_inflection_accurracy" in Track B. Note that higher values in the original measure mean *lower* rather than higher complexity.
@@ -103,7 +109,8 @@ track.b$CR_inflection_accuracy <- 1-track.b$CR_inflection_accuracy
 
 Center and scale all numerical columns to make them more comparable.
 ```{r}
-track.a.scaled <- cbind(track.a[1:2], scale(track.a[3:ncol(track.a)])) # keep meta-information columns again
+# keep meta-information columns again
+track.a.scaled <- cbind(track.a[1:2], scale(track.a[3:ncol(track.a)])) 
 track.b.scaled <- cbind(track.b[1:2], scale(track.b[3:ncol(track.b)])) 
 ```
 
@@ -200,7 +207,19 @@ We here plot the highest *positive* and *negative* correlations (in terms of Spe
 track.a.positive.detailed <- ggplot(track.a, aes(x = GM_TTR_fullyparallelised, y = O_WID)) + 
   geom_point(alpha = 0.3) +
   geom_smooth(method = loess, alpha = 0.3) +
-  geom_label_repel(data = track.a[track.a$language == "Fijian" | track.a$language == "Sango" | track.a$language == "Vietnamese" | track.a$language == "Vietnamese" | track.a$language == "English" | track.a$language == "Georgian" |  track.a$language == "Russian" | track.a$language == "Swahili" | track.a$language == "Basque" | track.a$language == "Finnish" | track.a$language == "Turkish" | track.a$language == "Korean" | track.a$language == "Kalaallisut" | track.a$language == "Burmese", ],
+  geom_label_repel(data = track.a[track.a$language == "Fijian" 
+                                  | track.a$language == "Sango" 
+                                  | track.a$language == "Vietnamese" 
+                                  | track.a$language == "English" 
+                                  | track.a$language == "Georgian" 
+                                  | track.a$language == "Russian" 
+                                  | track.a$language == "Swahili" 
+                                  | track.a$language == "Basque" 
+                                  | track.a$language == "Finnish" 
+                                  | track.a$language == "Turkish" 
+                                  | track.a$language == "Korean" 
+                                  | track.a$language == "Kalaallisut" 
+                                  | track.a$language == "Burmese", ],
                    min.segment.length = 0,
                    #nudge_x = 0.1,
                    aes(label = language), 
@@ -221,7 +240,17 @@ Some comments: This plot shows that the Type-Token Ratio (TTR) and the Word Info
 track.b.positive.detailed <- ggplot(track.b, aes(x = CR_msp, y = SBS_INF)) + 
   geom_point(alpha = 0.3) +
   geom_smooth(method = loess, alpha = 0.3) +
-  geom_label_repel(data = track.b[track.b$language == "Chinese" | track.b$language == "Vietnamese" | track.b$language == "English" | track.b$language == "Russian" | track.b$language == "Old Church Slavonic" | track.b$language == "Basque" | track.b$language == "Finnish" | track.b$language == "Turkish" | track.b$language == "Latin" | track.b$language == "Uyghur" | track.b$language == "Ancient Greek", ],
+  geom_label_repel(data = track.b[track.b$language == "Chinese" 
+                                  | track.b$language == "Vietnamese" 
+                                  | track.b$language == "English" 
+                                  | track.b$language == "Russian" 
+                                  | track.b$language == "Old Church Slavonic" 
+                                  | track.b$language == "Basque" 
+                                  | track.b$language == "Finnish" 
+                                  | track.b$language == "Turkish" 
+                                  | track.b$language == "Latin" 
+                                  | track.b$language == "Uyghur" 
+                                  | track.b$language == "Ancient Greek", ],
                    min.segment.length = 0,
                    #nudge_x = 0.1,
                    aes(label = language), 
@@ -263,7 +292,20 @@ track.b <- track.b[track.b$language != "Korean", ] # remove the outlier Korean
 track.b.negative.detailed <- ggplot(track.b, aes(x = CR_mfe, y = SI_dep_dl)) + 
   geom_point(alpha = 0.3) +
   geom_smooth(method = loess, alpha = 0.3) +
-  geom_label_repel(data = track.b[track.b$language == "Chinese" | track.b$language == "Vietnamese" | track.b$language == "German" | track.b$language == "English" | track.b$language == "Hungarian" | track.b$language == "Greek" | track.b$language == "Russian" | track.b$language == "Old Church Slavonic" | track.b$language == "Basque" | track.b$language == "Finnish" | track.b$language == "Turkish" | track.b$language == "Latin" | track.b$language == "Uyghur" | track.b$language == "Ancient Greek", ],
+  geom_label_repel(data = track.b[track.b$language == "Chinese" 
+                                  | track.b$language == "Vietnamese" 
+                                  | track.b$language == "German" 
+                                  | track.b$language == "English" 
+                                  | track.b$language == "Hungarian" 
+                                  | track.b$language == "Greek" 
+                                  | track.b$language == "Russian" 
+                                  | track.b$language == "Old Church Slavonic" 
+                                  | track.b$language == "Basque" 
+                                  | track.b$language == "Finnish" 
+                                  | track.b$language == "Turkish" 
+                                  | track.b$language == "Latin" 
+                                  | track.b$language == "Uyghur" 
+                                  | track.b$language == "Ancient Greek", ],
                     min.segment.length = 0,
                    #nudge_x = 0.1,
                    aes(label = language), 
@@ -285,7 +327,8 @@ scatterplots <- grid.arrange(track.a.positive.detailed, track.b.positive.detaile
 
 Safe to file.
 ```{r, warning = FALSE}
-ggsave("Figures/Corrs/scatterplots.pdf", scatterplots, dpi = 300, scale = 1, width = 9, height = 9, device = cairo_pdf)
+ggsave("Figures/Corrs/scatterplots.pdf", scatterplots, dpi = 300, 
+       scale = 1, width = 9, height = 9, device = cairo_pdf)
 ```
 
 # Conclusions
