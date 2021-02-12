@@ -1,5 +1,5 @@
 ---
-title: "Simulation Study"
+title: "Simulation Study: Negative Correlations and Equality of Means"
 author: ''
 date: "February 10, 2021"
 output:
@@ -35,6 +35,49 @@ Give the package versions.
 # version of packages loaded
 installed.packages()[names(sessionInfo()$otherPkgs), "Version"]
 ```
+
+# Introduction
+The purpose of this file is two-fold: a) It illustrates the decisions we take to statistically analyse the respective data, i.e. checking for normality of the data, choosing a statistical test for assessing equality in the median values of two distributions, and getting effect sizes for this test. b) It discusses under which conditions negative correlations (i.e. trade-offs) entail equi-complexity in the sense of a non-significant difference in the medians of two distributions. Both is achieved by using simulated data, i.e. pseudo-complexity measurements for two languages A and B, for which a negative correlation is pre-defined.  
+
+# Theoretical Background
+
+## Trade-offs as Negative Correlations
+Trade-offs are here conceptualized as negative correlations. We here choose the Pearson correlation coefficient r as an example. For samples from two random variables X and Y it is defined as
+
+\begin{equation}
+r_{xy}= \frac{\sum_{i=1}^{n} (x_i - \overline{x})(y_i - \overline{y})}{\sqrt{\sum_{i=1}^{n}(x_i - \overline{x})^2} \sqrt{\sum_{i=1}^{n}(y_i - \overline{y})^2}}.
+\end{equation}
+
+Where $n$ is the number of data points in the paired samples, $x_i$ and $y_i$ are individual data points, and $\overline{x}$ and $\overline{y}$ are the sample means. We have a negative correlation $r_{xy} < 0$ iff the numerator is negative, i.e. 
+
+\begin{equation}
+\sum_{i=1}^{n} (x_i - \overline{x})(y_i - \overline{y}) < 0.  
+\end{equation}
+
+Note that the denominator cannot be negative.
+
+## Equi-Complexity as Equality of Means
+Furthermore, we conceptualize equi-complexity as equality of means. Assume that the $x_i$s and $y_i$s represent complexity measurements for two languages A and B. We would then consider A and B equi-complex if 
+
+\begin{equation}
+\overline{x} = \overline{y},  
+\end{equation}
+
+where 
+
+\begin{equation}
+\overline{x} = \frac{1}{n}\sum_{i=1}^{n} x_i,  
+\end{equation}
+
+and 
+
+\begin{equation}
+\overline{y} = \frac{1}{n}\sum_{i=1}^{n} y_i.  
+\end{equation}
+
+## Linear Transformation
+We here proof that a negative Pearson correlation between two samples $x_i$ and $y_i$ does not strictly entail equality of means, i.e. $\overline{x} = \overline{y}$. 
+
 
 # Generate Correlated Data
 We here generate correlated pseudo-complexity measurements for two languages A and B. We then apply linear and non-linear transformations to illustrate how this impacts the results of correlation and mean value analyses. 
@@ -233,10 +276,6 @@ Baayen, R. H. (2008). Analyzing linguistic data: A practical introduction using 
 Cahusac, P. M. B. (2021). Evidence-based statistics. John Wiley & Sons.
 
 Crawley, M. J. (2007). The R book. John Wiley & Sons Ltd.
-
-Ehret, K. and B. Szmrecsanyi (2016). An information-theoretic approach to assess linguistic complexity. In: R. Baechler & G. Seiler (eds.), Complexity, Isolation, and Variation, 71-94. Berlin: de Gruyter.
-
-Kruschke, J. K. (2012). Bayesian estimation supersedes the t test. Journal of Experimental Psychology.
 
 McDonald, J.H. (2014). Handbook of Biological Statistics (3rd ed.). Sparky House Publishing, Baltimore, Maryland. online at http://www.biostathandbook.com
 
