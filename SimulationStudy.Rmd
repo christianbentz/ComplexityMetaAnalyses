@@ -37,7 +37,7 @@ installed.packages()[names(sessionInfo()$otherPkgs), "Version"]
 ```
 
 # Introduction
-The purpose of this file is two-fold: a) It illustrates the decisions we take to statistically analyse the respective data, i.e. checking for normality of the data, choosing a statistical test for assessing equality in the median values of two distributions, and getting effect sizes for this test. b) It discusses under which conditions negative correlations (i.e. trade-offs) entail equi-complexity in the sense of a non-significant difference in the medians of two distributions. Both is achieved by using simulated data, i.e. pseudo-complexity measurements for two languages A and B, for which a negative correlation is pre-defined.  
+The purpose of this file is two-fold: a) It discusses under which conditions negative correlations (i.e. trade-offs) entail equi-complexity in the sense of a non-significant difference in the means of two distributions. b) It illustrates the decisions we take to statistically analyse the respective data, i.e. checking for normality of the data, choosing a statistical test for assessing equality in the mean values of two distributions, and getting effect sizes for this test. Both is achieved by using simulated data, i.e. pseudo-complexity measurements for two languages A and B, for which a negative correlation is pre-defined.  
 
 # Theoretical Background
 
@@ -76,7 +76,23 @@ and
 \end{equation}
 
 ## Linear Transformation
-We here proof that a negative Pearson correlation between two samples $x_i$ and $y_i$ does not strictly entail equality of means, i.e. $\overline{x} = \overline{y}$. 
+We here proof that a negative Pearson correlation between any two samples $x_i$ and $y_i$ does not strictly entail equality of means, i.e. $\overline{x} = \overline{y}$. We therefore apply a linear transformation to one of the samples, i.e. multiplying the $x_i$s with a constant $\alpha > 0$. We thus get a new mean value
+
+\begin{equation}
+\overline{x}^\prime = \frac{1}{n}\sum_{i=1}^{n} \alpha x_i = \frac{\alpha}{n}\sum_{i=1}^{n} x_i = \alpha \overline{x}.
+\end{equation}
+
+We find that
+
+\[ \overline{y} 
+  \begin{cases}
+    < \overline{x}^\prime & \quad \text{if } \alpha > 1 \\
+    > \overline{x}^\prime & \quad \text{if } 0 < \alpha  < 1 \\
+    = \overline{x}^\prime & \quad \text{if } \alpha = 1
+  \end{cases}
+\]
+
+Hence, after linear transformation it is the case that the sample means differ, i.e. $\overline{x}^\prime \neq \overline{y}$ under the condition that $\alpha \neq 1$. For example, if we choose $\alpha = 2$ then the new sample mean would be twice the former sample mean, i.e. $\overline{x}^\prime = 2\overline{y}$.
 
 
 # Generate Correlated Data
