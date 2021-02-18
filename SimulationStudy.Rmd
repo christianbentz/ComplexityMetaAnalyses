@@ -42,7 +42,7 @@ The purpose of this file is two-fold: a) It discusses under which conditions neg
 # Theoretical Background
 
 ## Trade-offs as Negative Correlations
-Trade-offs are here conceptualized as negative correlations. We here choose the Pearson correlation coefficient r as an example. For samples from two random variables X and Y it is defined as
+Trade-offs are here conceptualized as negative correlations. We here choose the Pearson correlation coefficient r as an example. Assume that we have two samples $x = (x_1, x_2, \dots , x_n)$ and $y = (y_1, y_2, \dots , y_n)$ from two random variables X and Y. The Pearson correlation for these samples is then defined as
 
 \begin{equation}
 r_{xy}= \frac{\sum_{i=1}^{n} (x_i - \overline{x})(y_i - \overline{y})}{\sqrt{\sum_{i=1}^{n}(x_i - \overline{x})^2} \sqrt{\sum_{i=1}^{n}(y_i - \overline{y})^2}}.
@@ -75,7 +75,7 @@ and
 \overline{y} = \frac{1}{n}\sum_{i=1}^{n} y_i.  
 \end{equation}
 
-## Linear Transformation
+## The Effect of Linear Transformation
 We here proof that a negative Pearson correlation between any two samples $x_i$ and $y_i$ does not strictly entail equality of means, i.e. $\overline{x} = \overline{y}$. We therefore apply a linear transformation to one of the samples, i.e. multiplying the $x_i$s with a constant $\alpha > 0$. We thus get a new mean value
 
 \begin{equation}
@@ -88,11 +88,41 @@ We find that
   \begin{cases}
     < \overline{x}^\prime & \quad \text{if } \alpha > 1 \\
     > \overline{x}^\prime & \quad \text{if } 0 < \alpha  < 1 \\
-    = \overline{x}^\prime & \quad \text{if } \alpha = 1
+    = \overline{x}^\prime & \quad \text{if } \alpha = 1.
   \end{cases}
 \]
 
-Hence, after linear transformation it is the case that the sample means differ, i.e. $\overline{x}^\prime \neq \overline{y}$ under the condition that $\alpha \neq 1$. For example, if we choose $\alpha = 2$ then the new sample mean would be twice the former sample mean, i.e. $\overline{x}^\prime = 2\overline{y}$.
+Hence, after linear transformation the sample means differ, i.e. $\overline{x}^\prime \neq \overline{y}$ under the condition that $\alpha \neq 1$. For example, if we choose $\alpha = 2$ then the new sample mean would be twice the former sample mean, i.e. $\overline{x}^\prime = 2\overline{y}$.
+
+Now, if we apply the same transformation to the Pearson correlation we get
+
+\begin{equation}
+\begin{split}
+r_{xy}^\prime= \frac{\sum_{i=1}^{n} (\alpha x_i - \alpha \overline{x})(y_i - \overline{y})}{\sqrt{\sum_{i=1}^{n}(\alpha x_i - \alpha \overline{x})^2} \sqrt{\sum_{i=1}^{n}(y_i - \overline{y})^2}} = \\ 
+\frac{\sum_{i=1}^{n} \alpha(x_i - \overline{x})(y_i - \overline{y})}{\sqrt{\sum_{i=1}^{n} \alpha^2(x_i - \overline{x})^2} \sqrt{\sum_{i=1}^{n}(y_i - \overline{y})^2}} = \\ 
+\frac{\alpha \sum_{i=1}^{n} (x_i - \overline{x})(y_i - \overline{y})}{\alpha \sqrt{\sum_{i=1}^{n}(x_i - \overline{x})^2} \sqrt{\sum_{i=1}^{n}(y_i - \overline{y})^2}}.
+\end{split}
+\end{equation}
+
+Since $\alpha$ in the numerator and denominator cancels out, we have that
+
+\begin{equation}
+r_{xy}^\prime = r_{xy}.
+\end{equation}
+
+That is, the linear transformation does not affect the Pearson correlation. In fact, this holds for both negative and positive correlations. 
+
+In sum, while a linear transformation does affect the mean value of a sample, it does not affect the Pearson correlation with another sample. Since we can always apply a linear transformation to one (or both) of two samples, thus creating a new sample with a different mean value, which is still correlated with the other sample, this proofs that a negative (or positive) correlation cannot strictly entail equality of means of the two samples (without further assumptions). 
+
+## The Effect of Standardization
+Standardization is a particular type of transformation (see e.g. Baayen 2008, p. 65) where we substract the mean from all elements in the sample (i.e. $x^{c} = x_i - \overline{x}$, also called "centering"), as well as divide by the standard deviation of the sample (i.e. $x^{s} = \frac{x_i}{\sigma_x}$, also called "scaling"). If we apply first centering and then scaling we get 
+
+\begin{equation}
+x^{st} = \frac{x^{c}}{\sigma_{x^c}}.
+\end{equation}
+
+In the following, we show that centering of both samples neutralizes the effect of linear transformations on means. As a consequence, when both samples are centered, Pearson correlations do indeed entail equality of means. 
+
 
 
 # Generate Correlated Data
