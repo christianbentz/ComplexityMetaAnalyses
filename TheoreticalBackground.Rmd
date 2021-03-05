@@ -129,7 +129,7 @@ Firstly, assume that we have a perfect negative Pearson and Spearman correlation
 ```{r}
 language = c("L1", "L2", "L3", "L4", "L5")
 m <- c(1, 2, 3, 4, 5)
-s <- 5 + -1*m
+s <- 5 + -1*(m-1)
 example.df <- data.frame(language, m, s)
 print(example.df)
 ```
