@@ -1,7 +1,7 @@
 ---
 title: 'Theoretical Background: Negative Correlations and Equality of Means'
 author: "Chris Bentz"
-date: "04 February 2021"
+date: "15 March 2021"
 output:
   pdf_document: default
   html_document: default  
@@ -98,7 +98,7 @@ where rank() is a function that gives the rank of the respective value when the 
 \end{equation}
 
 ## Equi-Complexity as Equality of Means
-Furthermore, we conceptualize equi-complexity of languages $L_1$ to $L_n$ here as equality of arithmetic means. For instance, if language $L_1$ has a morphological complexity of $m_1 = 5$ and a syntactic complexity of $s_1 = 1$, and language $L_2$ has $m_2 = 1$ and $s_2 = 5$, then the arithmetic mean complexity is 3 for both. Hence, they are considered overall equally complex. Assume more generally that $m_j$ and $s_j$ as well as $m_k$ and $s_k$ represent complexity measurements for two languages $L_j$ and $L_k$. We would then consider the languages equi-complex iff 
+Furthermore, we conceptualize equi-complexity of languages $L_1$ to $L_n$ here as equality of arithmetic means. For instance, if language $L_1$ has a morphological complexity of $m_1 = 5$ and a syntactic complexity of $s_1 = 1$, and language $L_2$ has $m_2 = 1$ and $s_2 = 5$, then the arithmetic mean complexity is 3 for both. Hence, they are considered overall equally complex. Assume more generally that $m_j$ and $s_j$ and $m_k$ and $s_k$ represent complexity measurements for two languages $L_j$ and $L_k$. We would then consider the languages equi-complex iff 
 
 \begin{equation}
 \overline{L_j} = \overline{L_k},  
@@ -107,19 +107,19 @@ Furthermore, we conceptualize equi-complexity of languages $L_1$ to $L_n$ here a
 where 
 
 \begin{equation}
-\overline{L_j} = \frac{1}{d}(m_j + s_j),  
+\overline{L_j} = \frac{1}{2}(m_j + s_j),  
 \end{equation}
 
 and 
 
 \begin{equation}
-\overline{L_k} = \frac{1}{d}(m_k + s_k). 
+\overline{L_k} = \frac{1}{2}(m_k + s_k). 
 \end{equation}
 
-Here $d$ is the number of different domains for which we measure complexity, i.e. d = 2 in our example of morphology and syntax.
+For simplicity we here have just two different domains and just one measure per domain, i.e. one measure for morphology and one for syntax. Of course, in actual practice we could also have more than two domains, and several measures per domain.  
 
 # Proof
-We here proof by counterexample that neither a negative Pearson nor a negative Spearman correlation between two samples of complexity measurements in different domains strictly entail equality of means for the respective languages from which these measurments were taken. In other words, we will disproof by counterexample the claim that    
+We here proof by counterexample that neither a negative Pearson nor a negative Spearman correlation between two samples of complexity measurements in different domains strictly entails equality of means for the respective languages from which these measurments were taken. In other words, we will disproof by counterexample the claim that    
 \begin{equation}
 (r_{ms} < 0), (\rho_{ms} < 0) \vdash (\overline{L_j} = \overline{L_k}).
 \end{equation}
@@ -186,20 +186,20 @@ cor(example.df$m, example.df$s, method = "spearman")
 
 To summarize, in our example data set we have perfect negative correlations between the measurements in the two domains, i.e. a perfect trade-off between morphological and syntactic complexity, and we have equality of means across the languages, i.e. overall equi-complexity.
 
-Now, let us "flatten" the curve by decreasing the slope with which the syntactic complexity decreases with morphological complexity to 0.5 (instead of 1 as before). We thus get the following syntactic complexity values, e.g. by squaring them such that $s^{\prime} = 5 - 0.5m$.
+Now, let us "flatten" the curve by decreasing the slope with which the syntactic complexity decreases with morphological complexity to 0.5 (instead of 1 as before), such that we have $s^{\prime} = 5 - 0.5m$. We thus get the following syntactic complexity values: 
 ```{r}
 language = c("L1", "L2", "L3", "L4", "L5")
 m <- c(1, 2, 3, 4, 5)
-s_prime <- 5 - 0.5*m
-example.df <- data.frame(language, m, s, s_prime)
+s_prime1 <- 5 - 0.5*m
+example.df <- data.frame(language, m, s, s_prime1)
 print(example.df)
 ```
 
 This data set is visualized in the plot below.
 ```{r}
-plot(example.df$m, example.df$s_prime, xlab = "morphological complexity (m)",
+plot(example.df$m, example.df$s_prime1, xlab = "morphological complexity (m)",
      ylab = "syntactic complexity (s_prime)", xlim = c(1, 5.5), ylim = c(0, 5))
-text(example.df$m, example.df$s_prime, labels = example.df$language, cex = 0.7, pos = 4)
+text(example.df$m, example.df$s_prime1, labels = example.df$language, cex = 0.7, pos = 4)
 ```
 
 Since the syntactic complexity here decreases less than the morphological complexity increases, we now get differing mean values across the languages.
@@ -218,7 +218,7 @@ For the condition for a negative Pearson correlation we now get
 \begin{split}
 \sum_{i=1}^{n} (m_i - \overline{m})(s_i^{\prime} - \overline{s}^{\prime}) = \\
 (1 - 3)(4.5 - 3.5) + (2 - 3)(4 - 3.5) + (3 - 3)(3.5 - 3.5) + (4 - 3)(3 - 3.5) + (5 - 3)(2.5 - 3.5) = \\
--4 - 0.5 + 0 - 0.5 - 2 = - 7
+-4 - 0.5 + 0 - 0.5 - 2 = - 7.
 \end{split}
 \end{equation}
 
@@ -234,14 +234,14 @@ In order to evaluate the Spearman condition (equation (\ref{eq:spearmanCond})), 
 language = c("L1", "L2", "L3", "L4", "L5")
 m <- c(1, 2, 3, 4, 5)
 s <- 6 - 1*m
-s_prime <- 5 - 0.5*m
+s_prime1 <- 5 - 0.5*m
 rank_m <- c(1, 2, 3, 4, 5)
-rank_s_prime <- c(5, 4, 3, 2, 1)
-example.df <- data.frame(language, m, s, s_prime, rank_m, rank_s_prime)
+rank_s_prime1 <- c(5, 4, 3, 2, 1)
+example.df <- data.frame(language, m, s, s_prime1, rank_m, rank_s_prime1)
 print(example.df)
 ```
 
-We can already see in the table that the ranking order involving $s^{\prime}$ is equivalent to $s$. Hence, we get the exact same result as before.
+We can already see in the table that the rank order involving $s^{\prime}$ is equivalent to $s$. Hence, we get the exact same result as before.
 
 \begin{equation}
 \begin{split}
@@ -253,31 +253,26 @@ We thus also still have a perfect negative Spearman correlation.
 
 This result can be double-checked with the R function cor().
 ```{r}
-cor(example.df$m, example.df$s_prime, method = "spearman")
+cor(example.df$m, example.df$s_prime1, method = "spearman")
 ```
 
-# Summary
-We have thus found a simple transformation of our syntactic complexity values which yields the exact same perfect negative correlations as the untransformed syntactic complexity values for both the Pearson and the Spearman correlation. However, while in the case of the original syntactic complexity values ($s$) the means across languages are also the same, in the scenario of transformed values ($s^{\prime}$), they are not. This proofs that not even perfect negative Pearson and Spearman correlations strictly entail equality of means, i.e.
+In sum, a linear transformation which "flattens" the curve between morphological and syntactic complexity values does not impact the Pearson or Spearman correlation, i.e. it preserves the trade-offs. However, it changes the mean values of languages, and hence breaks the equality of means.   
 
-\begin{equation}
-(r_{ms} < 0), (\rho_{ms} < 0) \nvdash (\overline{L_j} = \overline{L_k}).
-\end{equation}
+# Standardization
 
-# Open Issues
-
-## Standardization of data
+## Standardization of linearly transformed data
 In the proof above we have used two slightly differing linear transformations to derive $s$ and $s^{\prime}$ from m. A general formular for linear transformations is $y = a + bx$. In the first case we used a = 6 and b = -1, and in the second case a = 5 and b = -0.5. It is noteworthy in this context that standardization of the sample values neutralizes the effect of linear transformations on the mean values of languages.  
 
-Standardization typically involves centering (which is defined as subtracting the mean value from all individual values of a sample), and scaling (which is defined as dividing the values of a sample by the standard deviation of the sample.). For instance, centering of the morphological complexity values is generally defined as 
+Standardization typically involves centering (which is defined as subtracting the mean value from all individual values of a sample), and scaling (which is defined as dividing the values of a sample by the standard deviation of the sample.). For instance, with the morphological complexity values centering is defined as 
 
 \begin{equation}
-m^{centered} = m-\overline{m},
+m^{\text{centered}} = m-\overline{m},
 \end{equation}
 
 and scaling is defined as
 
 \begin{equation}
-m^{scaled} = \frac{m}{\sigma^m},
+m^{\text{scaled}} = \frac{m}{\sigma^m},
 \end{equation}
 
 where $\sigma^m$ is the standard deviation of the morphological complexity values.
@@ -285,7 +280,7 @@ where $\sigma^m$ is the standard deviation of the morphological complexity value
 Standardization then typically involves both centering and scaling, such that we have
 
 \begin{equation}
-m^{standardized} = \frac{m-\overline{m}}{\sigma^m},
+m^{\text{standardized}} = \frac{m-\overline{m}}{\sigma^m},
 \end{equation}
 
 As an example, let us standardize the $m$, $s$, and $s^\prime$ sample values from above:
@@ -293,19 +288,83 @@ As an example, let us standardize the $m$, $s$, and $s^\prime$ sample values fro
 ```{r}
 m_standardized <- (m-mean(m))/sd(m)
 s_standardized <- (s-mean(s))/sd(s)
-s_prime_standardized <- (s_prime-mean(s_prime))/sd(s_prime)
-example.df <- data.frame(m, s, s_prime, m_standardized, s_standardized, s_prime_standardized)
+s_prime1_standardized <- (s_prime1-mean(s_prime1))/sd(s_prime1)
+example.df <- data.frame(m, s, s_prime1, m_standardized, s_standardized, s_prime1_standardized)
 example.df
 ```
 
-Remember that each row of this data frame corresponds to values of a different languages. As we have pointed out above, the mean values per language given $m$ and $s^\prime$ are different, i.e.
+Remember that each row of this data frame corresponds to values of a different language. As we have pointed out above, the mean values per language given $m$ and $s^\prime$ are different, i.e.
 ```{r}
-(m + s_prime)/2
+(m + s_prime1)/2
 ```
 
-However, this effect of the linear transformation from $s$ to $s^\prime$ on the mean values of the languages is neutralized if we standardize both m and s_prime, i.e.
+However, this effect of the linear transformation from $s$ to $s^\prime$ on the mean values of the languages is neutralized if we standardize both $m$ and $s^\prime$, i.e.
 ```{r}
-(m_standardized + s_prime_standardized)/2
+(m_standardized + s_prime1_standardized)/2
 ```
 
-Thus, due to standardization of the data, the mean values across languages are again equal, despite the linear transformation of on $s$. 
+Thus, due to standardization of the data, the mean values across languages are again equal, despite the linear transformation of $s$ to $s^\prime$. 
+
+## Standardization of non-linearly transformed data
+Apart from linear transformations we could also consider non-linear transformations of the data. For instance, by squaring the original syntactic complexity values such that we have
+
+\begin{equation}
+s^\prime = s^2.
+\end{equation}
+
+With our example from above this would yield:
+```{r}
+language = c("L1", "L2", "L3", "L4", "L5")
+m <- c(1, 2, 3, 4, 5)
+s <- 6 - 1*m
+s_prime2 <- s^2
+example.df <- data.frame(language, m, s, s_prime2)
+print(example.df)
+```
+
+For the Pearson correlation we thus get:
+
+```{r}
+cor(example.df$m, example.df$s_prime2, method = "pearson")
+```
+
+and for the Spearman correlation we get:
+```{r}
+cor(example.df$m, example.df$s_prime2, method = "spearman")
+```
+
+As we would expect, the non-linear transformation impacts the Pearson correlation (at least slightly), but not the Spearman correlation. Moreover, just as in the case of a linear transformation discussed above, the mean values per language now differ, i.e.
+```{r}
+(m + s_prime2)/2
+```
+
+Importantly, note that in this case of a non-linear transformation, the inequality of means is preserved even under standardization. 
+```{r}
+m_standardized <- (m-mean(m))/sd(m)
+s_prime2_standardized <- (s_prime2-mean(s_prime2))/sd(s_prime2)
+# get correlations between standardized samples
+cor(m_standardized, s_prime2_standardized, method = "pearson")
+cor(m_standardized, s_prime2_standardized, method = "spearman")
+# get mean values for standardized samples
+(m_standardized + s_prime2_standardized)/2
+```
+
+Thus, standardization only recovers equality of means for the linear transformation we have discussed, but not for the non-linear transformation. 
+
+# Summary
+In conclusion, measurements of complexity in separate domains (here morphology and syntax) might well have perfect Pearson and Spearman correlations across languages, while mean complexity values per language can still differ. 
+
+Firstly, we have illustrated this dissociation between negative correlations and equality of means by using a linear transformation of syntactic complexity measurements. This linear transformation preserves the Pearson and Spearman correlations, but breaks equality of means. 
+
+Secondly, we have shown that in the case of such a linear transformation, equality of means can be recovered by standardization of the values per domain. However, for non-linear transformations (at least the quadratic transformation discussed here) this is not necessarily the case. 
+
+This proofs that negative Pearson and Spearman correlations do not strictly entail equality of means, i.e.
+
+\begin{equation}
+(r_{ms} < 0), (\rho_{ms} < 0) \nvdash (\overline{L_j} = \overline{L_k}).
+\end{equation}
+
+# Open Issues
+
+We have here given some analytic thoughts on the relationship between negative correlations and equality of means. However, we haven't considered the probabilistic component of random noise in the measurements, and statistical testing of equality of means. Also, we here only discussed the simple case of having one complexity measurement per domain, rather than several measurements. We address these points in a simulation study in a separate appendix.   
+
