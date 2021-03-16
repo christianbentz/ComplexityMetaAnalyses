@@ -28,6 +28,7 @@ library(ggplot2)
 library(plyr)
 library(GGally)
 library(rstatix)
+library(gridExtra)
 ```
 
 Give the package versions.
@@ -309,7 +310,7 @@ Thus, due to standardization of the data, the mean values across languages are a
 Apart from linear transformations we could also consider non-linear transformations of the data. For instance, by squaring the original syntactic complexity values such that we have
 
 \begin{equation}
-s^\prime = s^2.
+s^{\prime\prime} = s^2.
 \end{equation}
 
 With our example from above this would yield:
@@ -323,7 +324,6 @@ print(example.df)
 ```
 
 For the Pearson correlation we thus get:
-
 ```{r}
 cor(example.df$m, example.df$s_prime2, method = "pearson")
 ```
@@ -350,6 +350,92 @@ cor(m_standardized, s_prime2_standardized, method = "spearman")
 ```
 
 Thus, standardization only recovers equality of means for the linear transformation we have discussed, but not for the non-linear transformation. 
+
+## Combined Plots
+Combine all transformations and original data in one data frame for visualization purposes.
+```{r}
+# original m and s values
+language <- c("L1", "L2", "L3", "L4", "L5")
+transformation <- rep("none", 5)
+standardization <- rep("non-standardized", 5)
+original.df <- data.frame(language, transformation, standardization, m, s)
+colnames(original.df) <- c("language", "transformation", 
+                           "standardization", "morphology", "syntax")
+# linear transformation of s
+transformation <- rep("linear", 5)
+linear.df <- data.frame(language, transformation, standardization, m, s_prime1)
+colnames(linear.df) <- c("language", "transformation", 
+                         "standardization", "morphology", "syntax")
+# non-linear transformation of s
+transformation <- rep("non-linear", 5)
+nonlinear.df <- data.frame(language, transformation, standardization, m, s_prime2)
+colnames(nonlinear.df) <- c("language", "transformation", 
+                            "standardization", "morphology", "syntax")
+# standarized original
+transformation <- rep("none", 5)
+standardization <- rep("standardized", 5)
+standardized.original.df <- data.frame(language, transformation, 
+                                       standardization, m_standardized, s_standardized)
+colnames(standardized.original.df) <- c("language", "transformation", 
+                                        "standardization", "morphology", "syntax")
+# standarized linear transformation of s
+transformation <- rep("linear", 5)
+standardization <- rep("standardized", 5)
+standardized.linear.df <- data.frame(language, transformation, 
+                                       standardization, m_standardized, s_prime1_standardized)
+colnames(standardized.linear.df) <- c("language", "transformation", 
+                                      "standardization", "morphology", "syntax")
+# standarized non-linear transformation of s
+transformation <- rep("non-linear", 5)
+standardization <- rep("standardized", 5)
+standardized.nonlinear.df <- data.frame(language, transformation, 
+                                        standardization, m_standardized, s_prime2_standardized)
+colnames(standardized.nonlinear.df) <- c("language", "transformation", 
+                                         "standardization", "morphology", "syntax")
+#combine all
+combined.df <- rbind(original.df, linear.df, nonlinear.df, standardized.original.df,
+                     standardized.linear.df, standardized.nonlinear.df)
+# add mean values per language
+combined.df$mean <- (combined.df$morphology + combined.df$syntax)/2
+print(combined.df)
+```
+
+Scatterplot with original values.
+```{r, fig.width = 4, fig.height = 4, warning = FALSE}
+scatterplot.original <- ggplot(combined.df[combined.df$standardization == "non-standardized", ], 
+                      aes(x = morphology, y = syntax, group = transformation,
+                          shape = language, color = transformation)) + 
+  geom_point(alpha = 0.7, size = 3) +
+  geom_line() +
+  ggtitle("Original Values") +
+  xlab("Pseudo-Complexity Morphology") +
+  ylab("Pseudo-Complexity Syntax") +
+  theme(legend.position = "none")
+#scatterplot.original
+```
+
+```{r, fig.width = 4, fig.height = 4, warning = FALSE}
+scatterplot.standardized <- ggplot(combined.df[combined.df$standardization == "standardized", ], 
+                     aes(x = morphology, y = jitter(syntax), group = transformation,
+                          shape = language, color = transformation)) + 
+  geom_point(alpha = 0.7, size = 3) +
+  geom_line() +
+  ggtitle("Standardized Values") +
+  xlab("Pseudo-Complexity Morphology") +
+  ylab("Pseudo-Complexity Syntax") 
+#scatterplot.standardized
+```
+
+Combine plots.
+```{r, fig.width = 10, fig.height = 4, warning = FALSE}
+combined.plot <- grid.arrange(scatterplot.original, scatterplot.standardized, ncol = 2, widths = c(1.5,2))
+```
+
+Save to file.
+```{r, warning = FALSE}
+ggsave("Figures/Theoretical/transformationsPlot.pdf", combined.plot, 
+       dpi = 300, scale = 1, width = 9, height = 4, device = cairo_pdf)
+```
 
 # Summary
 In conclusion, measurements of complexity in separate domains (here morphology and syntax) might well have perfect Pearson and Spearman correlations across languages, while mean complexity values per language can still differ. 

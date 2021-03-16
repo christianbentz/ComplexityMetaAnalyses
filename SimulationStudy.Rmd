@@ -133,7 +133,6 @@ scatterplot.selected <- ggplot(simulation.df.wide, aes(x = value.scaled.morpholo
 scatterplot.selected
 ```
 
-
 # Density Distributions
 Plot density distributions of complexity pseudo-measurements by language. Individual values for each complexity pseudo-measurement are plotted as black dots. The central value (0) is indicated by a vertical dotted line for visual reference. The median and mean values of complexity pseudo-measurements per language might also be indicated.
 
