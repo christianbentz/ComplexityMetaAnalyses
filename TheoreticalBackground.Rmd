@@ -351,7 +351,7 @@ cor(m_standardized, s_prime2_standardized, method = "spearman")
 
 Thus, standardization only recovers equality of means for the linear transformation we have discussed, but not for the non-linear transformation. 
 
-## Combined Plots
+## Combined Data and Plots
 Combine all transformations and original data in one data frame for visualization purposes.
 ```{r}
 # original m and s values
@@ -413,7 +413,7 @@ scatterplot.original <- ggplot(combined.df[combined.df$standardization == "non-s
   theme(legend.position = "none")
 #scatterplot.original
 ```
-
+Scatterplot with standardized values.
 ```{r, fig.width = 4, fig.height = 4, warning = FALSE}
 scatterplot.standardized <- ggplot(combined.df[combined.df$standardization == "standardized", ], 
                      aes(x = morphology, y = jitter(syntax), group = transformation,
