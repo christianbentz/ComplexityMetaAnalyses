@@ -1,7 +1,7 @@
 ---
-title: 'Theoretical Background: Negative Correlations and Equality of Means'
-author: "Chris Bentz"
-date: "15 March 2021"
+title: 'Appendix 1: Theoretical Background'
+author: ""
+date: "23 March 2021"
 output:
   pdf_document: default
   html_document: default  
