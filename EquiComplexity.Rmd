@@ -1,7 +1,7 @@
 ---
-title: 'Equi-Complexity Analyses'
+title: 'Appendix 5: Equi-Complexity Analyses'
 author: ""
-date: "February 10, 2021"
+date: "23 March, 2021"
 output:
   pdf_document: default
   html_document: default

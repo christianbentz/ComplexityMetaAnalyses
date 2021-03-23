@@ -1,7 +1,7 @@
 ---
-title: "Simulation Study: Negative Correlations and Equality of Means"
+title: "Appendix 2: Simulation Study"
 author: ''
-date: "15 March 2021"
+date: "23 March 2021"
 output:
   pdf_document: default
   html_document: default
