@@ -27,6 +27,7 @@ library(readr)
 library(ggmap)
 library(maps)
 library(gridExtra)
+library(ggrepel)
 ```
 
 Give the package versions.
@@ -65,6 +66,9 @@ area.map <- ggplot() +
   geom_point(data = languages, aes(x = longitude, y = latitude, 
                                  fill = macroarea), 
              alpha = 0.9, size = 3, pch = 21) +
+  geom_text_repel(data = languages, aes(x = longitude, y = latitude, 
+                                        label = name), size = 2,
+                  box.padding = unit(0.1, 'lines'), force = 0.5) +
   scale_y_continuous(limits = c(-65, 80)) +
   scale_x_continuous(breaks = c(-180, -90, 0, 90, 180)) +
   labs(x = "longitude", y = "latitude", fill = "Language Area") +
