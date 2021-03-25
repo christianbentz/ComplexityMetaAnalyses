@@ -1,7 +1,7 @@
 ---
 title: "Appendix 4: Correlations Between Complexity Measures"
 author: ""
-date: "23 March, 2021"
+date: "25 March, 2021"
 output:
   pdf_document: default
   html_document: default
@@ -182,9 +182,21 @@ ggsave("Figures/Corrs/correlogram_TrackA.pdf", correlogram.TrackA,
 ```
 
 ## TRACK B
-Same as above for Track A.
+Reorder columns to have measures of the same domain together.
+```{r}
+col_order <- c("BV_char_per_tok", "CR_inflection_accuracy", "CR_ttr",
+               "CR_msp", "CR_mfe", "CR_cfe_form_feat", "CR_cfe_feat_form",
+               "SI_dm", "SI_hm", "SBS_INF", "SBS_DER", "BV_n_tokens", 
+               "BV_verbal_head_per_sent", "BV_verbal_root_perc", "BV_avg_links_len",
+               "BV_avg_subordinate_chain_len", "BV_subordinate_pre", 
+               "BV_subordinate_post", "BV_avg_verb_edges", "S_idMean", "S_idSD", "SI_dep_dl")
+track.b.short.reorder <- track.b.short[, col_order]
+track.b.short.reorder
+```
+
+Same as above for Track A. 
 ```{r, fig.width = 12, fig.height = 12, message = F}
-cor.results.b <- corr.test(track.b.short, method = "spearman", 
+cor.results.b <- corr.test(track.b.short.reorder, method = "spearman", 
                          use = "pairwise.complete.obs", adjust = "holm")
 # produce correlogram
 correlogram.TrackB <- ggcorrplot(cor.results.b$r, p.mat = cor.results.b$p, type = "lower",
