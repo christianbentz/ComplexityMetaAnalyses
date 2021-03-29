@@ -1,7 +1,7 @@
 ---
 title: 'Appendix 5: Equi-Complexity Analyses'
 author: ""
-date: "23 March, 2021"
+date: "29 March, 2021"
 output:
   pdf_document: default
   html_document: default
@@ -104,7 +104,7 @@ nrow(results.long)
 
 Add meta-information on complexity measures.
 ```{r}
-results.long <- merge(results.long, meta.info[, 1:3], by = "measure")
+results.long <- merge(results.long, meta.info[, 2:4], by = "measure")
 ```
 
 Generate data frames for subdomains (morphology, syntax). This can be used for comparison with aggregated results.
@@ -195,6 +195,7 @@ In case of multiple testing, we should account for the fact that the likelihood 
 # the function jitter(), since we otherwise get warnings due to ties in the data
 p.values <- pairwise.wilcox.test(jitter(results.long$value), results.long$language, 
                      paired = F, p.adjust.method = "holm") 
+#print(p.values)
 # get dataframe with pairs of languages where p < 0.05
 m <- p.values$p.value
 indices <- which(m < 0.05, arr.ind = T)
@@ -208,6 +209,7 @@ print(df)
 ```{r, message = F}
 p.values.morph <- pairwise.wilcox.test(jitter(results.morph$value), results.morph$language, 
                      paired = F, p.adjust.method = "holm") 
+# print(p.values.morph)
 # we add some random noise here to the value vector with
 # the function jitter(), since we otherwise get warnings due to ties in the data
 # get dataframe with pairs of languages where p < 0.05
@@ -222,7 +224,8 @@ print(df)
 ### Tests for syntactic complexity measures
 ```{r, message = F}
 p.values.syntax <- pairwise.wilcox.test(jitter(results.syntax$value), results.syntax$language, 
-                     paired = F, p.adjust.method = "holm") 
+                     paired = F, p.adjust.method = "holm")
+# print(p.values.syntax)
 # we add some random noise here to the value vector with
 # the function jitter(), since we otherwise get warnings due to ties in the data
 m <- p.values.syntax$p.value
@@ -234,7 +237,7 @@ print(df)
 ```
 
 # Effect Size
-Statistical significance is only one part of the story. For instance, a difference in complexity values might be statistically significant, but so small that it is negligible for any theorizing. In fact, it is sometimes argued that effect sizes - rather than p-values - should be the aim of statistical inquiry (Cahusac 2020, p. 12-15). An overview of effect size measures per statistical test is given in Patil (2020). In conjunction with the Wilcoxon signed rank test we here use the statistic r (i.e. function wilcox_effsize() of the "rstatix" package). 
+Statistical significance is only one part of the story. For instance, a difference in complexity values might be statistically significant, but so small that it is negligible for any theorizing. In fact, it is sometimes argued that effect sizes -- rather than p-values -- should be the aim of statistical inquiry (Cahusac 2020, p. 12-15). An overview of effect size measures per statistical test is given in Patil (2020). In conjunction with the Wilcoxon rank sum test we here use the statistic r as an effect size measure (i.e. function wilcox_effsize() of the "rstatix" package). It runs from 0 to 1. Values from 0.10 to 0.3 are typically considered small effects, 0.3 to 0.5 moderate effects, and >= 0.5 large effects. 
 
 ### For all measures 
 ```{r}
