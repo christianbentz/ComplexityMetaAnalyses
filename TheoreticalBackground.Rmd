@@ -1,7 +1,7 @@
 ---
 title: 'Appendix 1: Theoretical Background'
 author: ""
-date: "23 March 2021"
+date: "29 March 2021"
 output:
   pdf_document: default
   html_document: default  
@@ -207,7 +207,7 @@ Since the syntactic complexity here decreases less than the morphological comple
 
 \begin{equation}
 \begin{split}
-\overline{L_1^{\prime}} = \frac{5.5 + 1}{2} = 2.75 \\
+\overline{L_1^{\prime}} = \frac{4.5 + 1}{2} = 2.75 \\
 \overline{L_2^{\prime}} = \frac{4 + 2}{2} = 3 \\
 etc.
 \end{split}
@@ -407,7 +407,7 @@ scatterplot.original <- ggplot(combined.df[combined.df$standardization == "non-s
                           shape = language, color = transformation)) + 
   geom_point(alpha = 0.7, size = 3) +
   geom_line() +
-  ggtitle("Original Values") +
+  ggtitle("a) Original Values") +
   xlab("Pseudo-Complexity Morphology") +
   ylab("Pseudo-Complexity Syntax") +
   theme(legend.position = "none")
@@ -420,7 +420,7 @@ scatterplot.standardized <- ggplot(combined.df[combined.df$standardization == "s
                           shape = language, color = transformation)) + 
   geom_point(alpha = 0.7, size = 3) +
   geom_line() +
-  ggtitle("Standardized Values") +
+  ggtitle("b) Standardized Values") +
   xlab("Pseudo-Complexity Morphology") +
   ylab("Pseudo-Complexity Syntax") 
 #scatterplot.standardized
