@@ -1,7 +1,7 @@
 ---
-title: "Appendix 2: World Maps"
+title: "Appendix 3: World Maps"
 author: ''
-date: "23 March, 2021"
+date: "30 March, 2021"
 output:
   pdf_document: default
   html_document: default
@@ -46,6 +46,7 @@ languages <- as.data.frame(read_csv("https://raw.githubusercontent.com/IWMLC/lan
 ```{r}
 length(unique(languages$isocodes)) # number of languages according to iso: 79
 length(unique(languages$glottocode)) # number of languages according to glottolog: 79
+length(unique(languages$family_id)) # 34
 unique(languages$macroarea) # macroareas: 6
 ```
 
@@ -57,34 +58,34 @@ languages <- languages[languages$isocodes != "nno", ]
 
 # World Map
 World maps with macroarea information from Glottolog.
-```{r, fig.width = 8, fig.height = 8, warning = FALSE}
+```{r, fig.width = 8, fig.height = 9, warning = FALSE}
 # create world map
 world <- map_data("world")
-area.map <- ggplot() + 
+family.map <- ggplot() + 
   geom_polygon(data = world, aes(x = long, y = lat, group = group), 
                fill = "white", colour = "darkgrey") +
   geom_point(data = languages, aes(x = longitude, y = latitude, 
-                                 fill = macroarea), 
+                                 fill = family_id), 
              alpha = 0.9, size = 3, pch = 21) +
   geom_text_repel(data = languages, aes(x = longitude, y = latitude, 
                                         label = name), size = 2,
                   box.padding = unit(0.1, 'lines'), force = 0.5) +
   scale_y_continuous(limits = c(-65, 80)) +
   scale_x_continuous(breaks = c(-180, -90, 0, 90, 180)) +
-  labs(x = "longitude", y = "latitude", fill = "Language Area") +
+  labs(x = "longitude", y = "latitude", fill = "Language Family") +
   theme_bw() +
   facet_wrap (~ corpus, nrow = 2) +
   theme(axis.title.x = element_text(size = 12),
         axis.title.y = element_text(size = 12),
         title = element_text(size = 12),
-        legend.title = element_text(size = 12),
-        legend.text = element_text(size = 12),
+        legend.title = element_text(size = 10),
+        legend.text = element_text(size = 10),
         legend.position = "bottom")
-area.map
+family.map
 ```
 
 Save to file.
 ```{r, warning = FALSE}
-ggsave("Figures/WorldMap/worldMaps.pdf", area.map, 
-       dpi = 300, scale = 1, width = 8, height = 8, device = cairo_pdf)
+ggsave("Figures/WorldMap/worldMaps.pdf", family.map, 
+       dpi = 300, scale = 1, width = 8, height = 10, device = cairo_pdf)
 ```
