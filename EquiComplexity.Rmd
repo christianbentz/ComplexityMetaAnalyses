@@ -77,21 +77,22 @@ Invert the values (by substracting them from 1) for the measure "CR_inflection_a
 results$CR_inflection_accuracy <- 1-results$CR_inflection_accuracy
 ```
 
-Center and scale all numerical columns to make them more comparable.
+Center and scale all numerical columns to make them more commensurable.
 ```{r}
 # scale and add meta-information columns again
 results.scaled <- cbind(results[1:2], scale(results[3:29])) 
 ```
 
-Remove certain measures. To include all measures, this code can just be commented out. In Track B, some measures given by the same team have strong positive correlations, e.g. the number of tokens in a sentence (BV_n_tokens) and the average number of tokens per clause (BV_avg_token_per_clause). We hence just keep one of the strongly correlated measures to not inflate the number of correlated data points.  Also there are measures with many NAs in Track B, i.e. "SI_double_dl", "SI_head_dl", "SI_zero_dl", which are removed here. 
+Remove certain measures. To include all measures, this code can just be commented out. In Track B, some measures given by the same team have strong positive correlations, e.g. the number of tokens in a sentence (BV_n_tokens) and the average number of tokens per clause (BV_avg_token_per_clause). We hence just keep one of the strongly correlated measures to not inflate the number of strongly correlated data points.  Also there are measures with many NAs in Track B, i.e. "SI_double_dl", "SI_head_dl", "SI_zero_dl", which are removed here. 
 ```{r}
 # Remove measures in Track B
 results.scaled <- results.scaled[ , -which(names(results.scaled) %in% 
                                              c("BV_avg_max_depth","BV_avg_token_per_clause",
                                                "SI_double_dl", "SI_head_dl", "SI_zero_dl"))]
+nrow(results.scaled)
 ```
 
-Transform data frame from wide format to long format (this is necessary for later plotting and analyses by columns rather than rows).
+Transform data frames from wide format to long format (this is necessary for later plotting and analyses by columns rather than rows). For later comparison we now have one dataframe in which there are still some NAs for certain languages and measures (i.e. Vietnamese and Turkish), and one dataframe where these languages are removed.
 ```{r}
 results.long <- gather(results.scaled, key = measure, value = value, BV_n_tokens:SBS_DER)
 ```
@@ -195,7 +196,7 @@ In case of multiple testing, we should account for the fact that the likelihood 
 # the function jitter(), since we otherwise get warnings due to ties in the data
 p.values <- pairwise.wilcox.test(jitter(results.long$value), results.long$language, 
                      paired = F, p.adjust.method = "holm") 
-#print(p.values)
+# print(p.values)
 # get dataframe with pairs of languages where p < 0.05
 m <- p.values$p.value
 indices <- which(m < 0.05, arr.ind = T)
