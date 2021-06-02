@@ -1,7 +1,7 @@
 ---
 title: 'Appendix 5: Equi-Complexity Analyses'
-author: ""
-date: "29 March, 2021"
+author: "Chris Bentz"
+date: "31 May, 2021"
 output:
   pdf_document: default
   html_document: default
@@ -92,7 +92,7 @@ results.scaled <- results.scaled[ , -which(names(results.scaled) %in%
 nrow(results.scaled)
 ```
 
-Transform data frames from wide format to long format (this is necessary for later plotting and analyses by columns rather than rows). For later comparison we now have one dataframe in which there are still some NAs for certain languages and measures (i.e. Vietnamese and Turkish), and one dataframe where these languages are removed.
+Transform data frames from wide format to long format (this is necessary for later plotting and analyses by columns rather than rows).
 ```{r}
 results.long <- gather(results.scaled, key = measure, value = value, BV_n_tokens:SBS_DER)
 ```
@@ -114,8 +114,15 @@ results.morph <- results.long[results.long$domain == "morphology", ]
 results.syntax <- results.long[results.long$domain == "syntax", ]
 ```
 
+We might have a closer look also at languages for which there are several treebanks (here we choose English, since it has most treebanks, i.e. four) in order to check whether the statistical results are similar for different treebanks of the same language (this is checked for the case of effect sizes further below). 
+```{r}
+# select languages with several treebanks
+selection <- c("English")
+results.long.selected <- results.long[results.long$language %in% selection, ]
+```
+
 # Density Distributions
-Plot density distributions of complexity measurements by language. Individual measurements for each complexity measure (and different corpora if available) are plotted as dots. The central value (0) is indicated by a vertical dotted line for visual reference.
+Plot density distributions of complexity measurements by language. Individual measurements for each complexity measure (and different treebanks if available) are plotted as dots. The central value (0) is indicated by a vertical gray line for visual reference.
 
 Create data frame with both domains + "overall", this is necessary for the plots below.
 ```{r}
@@ -124,13 +131,14 @@ results.overall$domain <- rep("overall", times = nrow(results.long))
 results.plot <- rbind(results.overall, results.long)
 ```
 
-Plot density distributions with indication of median (mean) values.
+## By Language
+Plot density distributions by language with indication of median (mean) values. Note that we limit the plotting range on the x-axis to -5 to 5 (standard deviations), meaning that extreme outliers are not plotted. There are 4 outliers dropped here, which results in a warning message "Removed 4 rows containing non-finite values (stat_density_ridges)".
 ```{r, fig.width = 12, fig.height = 10, message = F}
 density.plot <- ggplot(results.plot, aes(x = value, y = domain, fill = domain)) +
   geom_vline(aes(xintercept = 0), color = "darkgrey") +
   stat_density_ridges(quantile_lines = TRUE, quantiles = 0.5,
                       rel_min_height = 0.01, scale = 0.6, alpha = 0.5,
-                      jittered_points = TRUE, point_shape = "o", point_size = 1,
+                      jittered_points = TRUE, point_size = 0.5,
                       size = 0.25, position = position_points_jitter(height = 0.1)) +
   #geom_vline(data = med, aes(xintercept = grp.median), linetype = "dashed") +
   facet_wrap(~ language) +
@@ -146,6 +154,25 @@ Save figure to file.
 ggsave("Figures/EquiCompl/density_plot.pdf", density.plot, 
        dpi = 300, scale = 1, width = 12, height = 10, device = cairo_pdf)
 ```
+
+## By Treebank
+For visual comparison, also plot the density distributions faceted by treebank rather than by language.
+```{r, fig.width = 12, fig.height = 10, message = F}
+density.plot.treebanks <- ggplot(results.plot, aes(x = value, y = domain, fill = domain)) +
+  geom_vline(aes(xintercept = 0), color = "darkgrey") +
+  stat_density_ridges(quantile_lines = TRUE, quantiles = 0.5,
+                      rel_min_height = 0.01, scale = 0.6, alpha = 0.5,
+                      jittered_points = TRUE, point_size = 0.5,
+                      size = 0.25, position = position_points_jitter(height = 0.1)) +
+  #geom_vline(data = med, aes(xintercept = grp.median), linetype = "dashed") +
+  facet_wrap(~ id) +
+  xlim(-5, 5) +
+  labs(x = "Complexity Value", y = "Density") +
+  theme_bw() +
+  theme(legend.position = "none") 
+print(density.plot.treebanks)
+```
+
 
 # Statistical Tests
 Run statistical tests to assess whether the aggregate complexity distributions for certain pairs of languages differ signficantly from one another. Note that for this sample of 44 languages there are 44*(44-1)/2 = 946 possible pairwise comparisons. 
@@ -185,12 +212,15 @@ ggplot(results.long, aes(sample = value)) +
 
 ## Choose statistical tests
 Select a statistical test:
-Since there are some deviations from normality visible in the QQ-Plot above, we here choose a Wilcoxon test. If we supply two data vectors, then by default the command wilcox.test() runs a Wilcoxon rank sum test (for unpaired samples), and with "paired = T" a Wilcoxon signed rank test. Note that while the same measurement procedures were used here across different languages (and corresponding text samples) to assess different types of complexity, there are sometimes NAs in the original data. We thus have to consider the resulting vectors "unpaired". Note that pairwise.wilcox.test() is a function of the R-core stats package which runs multiple tests, i.e. for all groups in the "language" column in our case.
+Since there are some deviations from normality visible in the QQ-Plot above, we here choose a Wilcoxon test. If we supply two data vectors, then by default the command wilcox.test() runs a Wilcoxon rank sum test (for unpaired samples), and with "paired = T" a Wilcoxon signed rank test. Determining whether our data is "paired" or "unpaired" is tricky. On one hand, the same complexity measures were applied here across different languages (and corresponding text samples), and we show in our correlational analyses that the values given by these measures often correlate. The samples of complexity measurements per language could thus be considered "related" in the general sense of Cahusac (2021, p. 56). On the other hand, however, there are still some NAs in the data, and, for some languages, e.g. Czech and English, there are several treebanks in the UD, meaning that there are datapoints which are not matched in the samples of other languages. We thus consider the resulting vectors "unpaired". 
+
+Note that pairwise.wilcox.test() is a function of the R-core stats package which runs multiple tests, i.e. for all groups in the "language" column in our case.
 
 P-value adjustment for multiple comparisons:
 In case of multiple testing, we should account for the fact that the likelihood of finding a significant result by chance increases with the number of statistical tests. One of the most conservative methods to account for this is the so-called Bonferroni correction, i.e. multiplying the p-values with the number of tests. This method is appropriate when tests are independent of one another (MacDonald 2014, p. 254-260). Since we here run pairwise tests by languages, our tests are not independent (the same language is tested against others multiple times). We therefore apply the so-called Holm-Bonferroni method, which is less conservative. It does not assume independence between tests (see the descriptions in the vignette invoked by the command "?p.adjust()").
 
 ### Tests for all measures (morphology and syntax)
+We here run pairwise Wilcoxon tests and extract pairs of languages for which p<0.05 (after Holm-Bonferroni correction). This is for all measures aggregated. Below we do the same for morphological and syntactic complexity measures separately.
 ```{r, message = F}
 # we add some random noise here to the value vector with
 # the function jitter(), since we otherwise get warnings due to ties in the data
@@ -238,7 +268,7 @@ print(df)
 ```
 
 # Effect Size
-Statistical significance is only one part of the story. For instance, a difference in complexity values might be statistically significant, but so small that it is negligible for any theorizing. In fact, it is sometimes argued that effect sizes -- rather than p-values -- should be the aim of statistical inquiry (Cahusac 2020, p. 12-15). An overview of effect size measures per statistical test is given in Patil (2020). In conjunction with the Wilcoxon rank sum test we here use the statistic r as an effect size measure (i.e. function wilcox_effsize() of the "rstatix" package). It runs from 0 to 1. Values from 0.10 to 0.3 are typically considered small effects, 0.3 to 0.5 moderate effects, and >= 0.5 large effects. 
+Statistical significance is only one part of the story. For instance, a difference in complexity values might be statistically significant, but so small that it is negligible for any theorizing. In fact, it is sometimes argued that effect sizes -- rather than p-values -- should be the aim of statistical inquiry (Cahusac 2021, p. 12-15). An overview of effect size measures per statistical test is given in Patil (2020). In conjunction with the Wilcoxon rank sum test we here use the statistic r as an effect size measure (i.e. function wilcox_effsize() of the "rstatix" package). It runs from 0 to 1. Values from 0.1 to 0.3 are typically considered small effects, 0.3 to 0.5 moderate effects, and >= 0.5 large effects. 
 
 ### For all measures 
 ```{r}
@@ -258,8 +288,17 @@ effect.sizes.syntax <- wilcox_effsize(results.syntax, value ~ language, paired =
 #print(effect.sizes.syntax)
 ```
 
-## Effect Size Heatmap
-Plot a heatmap with effect sizes to get a better overview.
+### For all measures by treebank rather than language
+```{r}
+# all languages
+effect.sizes.treebanks <- wilcox_effsize(results.long, value ~ id, paired = F)
+# selected languages with several treebanks
+effect.sizes.treebanks.selected <- wilcox_effsize(results.long.selected, 
+                                                  value ~ id, paired = F)
+```
+
+## Effect Size Heatmaps
+Plot heatmaps with effect sizes for pairwise tests to get a better overview.
 
 ### For all measures
 ```{r, fig.width = 20, fig.height = 20}
@@ -306,10 +345,42 @@ effect.sizes.plot <- ggplot(as.data.frame(effect.sizes.syntax), aes(group1, grou
 effect.sizes.plot
 ```
 
-# Interpretation: 
-We find very little evidence for systematic differences (i.e. statistically significant differences with moderate to high effect sizes) in the aggregate complexities of the 44 languages investigated here. In fact, there are only five pairs of languages out of 946 for which we find statistically significant location shifts in the overall complexity distributions. These mostly involve Ancient Greek compared to modern day languages (English, Dutch, Norwegian, and Italian). A further significant difference we find between English and Romanian. While these results certainly depend on the number of data points (i.e. measurements) available per language, it is clearly visible in the effect size matrices, that for morphology and syntax separately we find sometimes considerable differences, while for the aggregated measures there are generally lower effect sizes. 
+### For all measures by treebank
+All of the statistical analyses above are based on pairwise comparisons between languages. However, we can also look at pairwise comparisons by treebanks, since some languages are represented by several treebanks.
+```{r, fig.width = 25, fig.height = 25}
+effect.sizes.plot <- ggplot(as.data.frame(effect.sizes.treebanks), aes(group1, group2)) +
+  geom_tile(aes(fill = effsize), color = "white") +
+  scale_fill_gradient2(low = "light blue", mid = "light grey", high = "red", 
+                       midpoint = 0.5, limit = c(0,1)) +
+  geom_text(aes(label = round(effsize, 2))) +
+  labs(x = "", y = "") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+effect.sizes.plot
+```
 
-So, given the data, methods, and languages in this meta study, there is strong evidence that languages have a tendency to be equi-complex, if different dimensions of complexity are aggregated. 
+Plot heatmap for selected languages/treebanks.
+```{r, fig.width = 3.5, fig.height = 2.5}
+effect.sizes.plot <- ggplot(as.data.frame(effect.sizes.treebanks.selected), 
+                            aes(group1, group2)) +
+  geom_tile(aes(fill = effsize), color = "white") +
+  scale_fill_gradient2(low = "light blue", mid = "light grey", high = "red", 
+                       midpoint = 0.5, limit = c(0,1)) +
+  geom_text(aes(label = round(effsize, 2))) +
+  labs(x = "", y = "") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+effect.sizes.plot
+```
+
+# Interpretation: 
+We find very little evidence for systematic differences (i.e. statistically significant differences with moderate to high effect sizes) in the aggregate complexities of the 44 languages investigated here. In fact, there are only five pairs of languages out of 946 for which we find statistically significant location shifts in the overall complexity distributions. These mostly involve Ancient Greek compared to modern day languages (English, Dutch, Norwegian, and Italian). A further significant difference we find between English and Romanian. 
+
+While these results certainly depend on the number of data points (i.e. measurements) available per language, it is clearly visible in the effect size matrices that for morphology and syntax separately we find sometimes considerable differences, while for both domains aggregated there are generally lower effect sizes. 
+
+The heatmap of effect sizes for English treebanks illustrates that within the same language there seems little evidence for complexity shifts depending on different styles/registers of treebanks (at least based on the UD data used here).   
+
+So, given the data, methods, and languages in this meta study, in the vast majority of cases we cannot reject the null hypothesis that languages are equally complex. 
 
 # References
 Cahusac, P. M. B. (2021). Evidence-based statistics. John Wiley & Sons.
