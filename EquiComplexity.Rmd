@@ -1,7 +1,7 @@
 ---
 title: 'Appendix 5: Equi-Complexity Analyses'
 author: "Chris Bentz"
-date: "31 May, 2021"
+date: "02 June, 2021"
 output:
   pdf_document: default
   html_document: default
@@ -122,7 +122,7 @@ results.long.selected <- results.long[results.long$language %in% selection, ]
 ```
 
 # Density Distributions
-Plot density distributions of complexity measurements by language. Individual measurements for each complexity measure (and different treebanks if available) are plotted as dots. The central value (0) is indicated by a vertical gray line for visual reference.
+Plot density distributions of complexity measurements by language and treebank. Individual measurements for each complexity measure (and different treebanks if available) are plotted as dots. The central value (0) is indicated by a vertical gray line for visual reference.
 
 Create data frame with both domains + "overall", this is necessary for the plots below.
 ```{r}
@@ -132,7 +132,7 @@ results.plot <- rbind(results.overall, results.long)
 ```
 
 ## By Language
-Plot density distributions by language with indication of median (mean) values. Note that we limit the plotting range on the x-axis to -5 to 5 (standard deviations), meaning that extreme outliers are not plotted. There are 4 outliers dropped here, which results in a warning message "Removed 4 rows containing non-finite values (stat_density_ridges)".
+Plot density distributions by language with indication of median values. Note that we limit the plotting range on the x-axis to -5 to 5 (standard deviations), meaning that extreme outliers are not plotted. There are 4 outliers dropped here, which results in a warning message "Removed 4 rows containing non-finite values (stat_density_ridges)".
 ```{r, fig.width = 12, fig.height = 10, message = F}
 density.plot <- ggplot(results.plot, aes(x = value, y = domain, fill = domain)) +
   geom_vline(aes(xintercept = 0), color = "darkgrey") +
@@ -140,7 +140,6 @@ density.plot <- ggplot(results.plot, aes(x = value, y = domain, fill = domain)) 
                       rel_min_height = 0.01, scale = 0.6, alpha = 0.5,
                       jittered_points = TRUE, point_size = 0.5,
                       size = 0.25, position = position_points_jitter(height = 0.1)) +
-  #geom_vline(data = med, aes(xintercept = grp.median), linetype = "dashed") +
   facet_wrap(~ language) +
   xlim(-5, 5) +
   labs(x = "Complexity Value", y = "Density") +
@@ -164,7 +163,6 @@ density.plot.treebanks <- ggplot(results.plot, aes(x = value, y = domain, fill =
                       rel_min_height = 0.01, scale = 0.6, alpha = 0.5,
                       jittered_points = TRUE, point_size = 0.5,
                       size = 0.25, position = position_points_jitter(height = 0.1)) +
-  #geom_vline(data = med, aes(xintercept = grp.median), linetype = "dashed") +
   facet_wrap(~ id) +
   xlim(-5, 5) +
   labs(x = "Complexity Value", y = "Density") +
@@ -376,7 +374,7 @@ effect.sizes.plot
 # Interpretation: 
 We find very little evidence for systematic differences (i.e. statistically significant differences with moderate to high effect sizes) in the aggregate complexities of the 44 languages investigated here. In fact, there are only five pairs of languages out of 946 for which we find statistically significant location shifts in the overall complexity distributions. These mostly involve Ancient Greek compared to modern day languages (English, Dutch, Norwegian, and Italian). A further significant difference we find between English and Romanian. 
 
-While these results certainly depend on the number of data points (i.e. measurements) available per language, it is clearly visible in the effect size matrices that for morphology and syntax separately we find sometimes considerable differences, while for both domains aggregated there are generally lower effect sizes. 
+While these results certainly depend on the number of data points (i.e. measurements) available per language, it is clearly visible in the effect size matrices that for morphology and syntax separately we find sometimes considerable differences, while for both domains aggregated there are generally low effect sizes. 
 
 The heatmap of effect sizes for English treebanks illustrates that within the same language there seems little evidence for complexity shifts depending on different styles/registers of treebanks (at least based on the UD data used here).   
 

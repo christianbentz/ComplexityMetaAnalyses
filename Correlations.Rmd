@@ -1,7 +1,7 @@
 ---
 title: "Appendix 4: Correlations Between Complexity Measures"
-author: ""
-date: "25 March, 2021"
+author: "Chris Bentz"
+date: "04 June, 2021"
 output:
   pdf_document: default
   html_document: default
@@ -120,10 +120,29 @@ Check the first 6 rows of the data.
 #head(track.b.scaled)
 ```
 
+Subset Track B data into Indo-European and non-Indo-European languages (these are used for separate correlational analyses below).
+```{r}
+# select Indo-European languages
+selection.IE <- c("Afrikaans", "Bulgarian", "Catalan", "Czech", "Old Church Slavonic",
+                  "Danish", "German", "Greek", "English", "Persian", 
+                  "French", "Gothic", "Ancient Greek", "Hindi", "Croatian", "Italian",
+                  "Latin", "Latvian", "Dutch", "Norwegian", "Polish", "Portuguese", 
+                  "Romanian", "Russian", "Slovak", "Slovenian", "Spanish", "Serbian",
+                  "Swedish", "Ukrainian", "Urdu")
+track.b.scaled.IE <- track.b.scaled[track.b.scaled$language %in% selection.IE, ]
+# select non-Indo-European languages
+selection.nonIE <- c("Arabic", "Chinese", "Estonian", "Basque", "Finnish", "Hebrew",
+                     "Hungarian", "Indonesian", "Japanese", "Korean", "Turkish", 
+                     "Uyghur", "Vietnamese")
+track.b.scaled.nonIE <- track.b.scaled[track.b.scaled$language %in% selection.nonIE, ]
+```
+
 Remove the first two columns of data frames (useful for plotting).
 ```{r}
 track.a.short <- track.a.scaled[, 3:ncol(track.a)]
 track.b.short <- track.b.scaled[, 3:ncol(track.b)]
+track.b.IE.short <- track.b.scaled.IE[, 3:ncol(track.b)]
+track.b.nonIE.short <- track.b.scaled.nonIE[, 3:ncol(track.b)]
 ```
 
 # Scatterplots by Track
@@ -134,8 +153,8 @@ For visual reference, we here firstly give scatterplots between selected measure
 ```{r, fig.width = 10, fig.height = 10, warning = FALSE}
 track.a.scatterplot <- ggpairs(track.a.short, 
                         lower = list(continuous = wrap("smooth_loess", alpha = 0.3, 
-                                                       lwd = 0.5, size = 2))) +
-                        #upper = list(continuous = wrap('cor', method = "spearman"))) +
+                                                       lwd = 0.5, size = 2)),
+                        upper = list(continuous = wrap('cor', method = "spearman"))) +
                         theme_bw() +
                         theme(axis.text.x = element_text(angle = 90, hjust = 1))
 print(track.a.scatterplot)
@@ -144,7 +163,7 @@ print(track.a.scatterplot)
 ## TRACK B
 Same for the Track B data. Not all measures are included here (there would be 24). To include them all, the "columns" argument in the code below might be removed.
 ```{r, fig.width = 15, fig.height = 15, warning = FALSE}
-track.b.scatterplot <- ggpairs(track.b.short, progress = TRUE,
+track.b.scatterplot <- ggpairs(track.b.short,
                         lower = list(continuous = wrap("smooth_loess", alpha = 0.3, 
                                                        lwd = 0.5, size = 2)),
                         upper = list(continuous = wrap('cor', method = "spearman")),
@@ -182,6 +201,9 @@ ggsave("Figures/Corrs/correlogram_TrackA.pdf", correlogram.TrackA,
 ```
 
 ## TRACK B
+Since Indo-European languages are overrepresented in Track B (Universal Dependencies data), we here first give an overall correlational analysis regardless of language family, and then we give separate analyses for Indo-European and non-Indo-European languages. This helps to get an idea to what extent the overall correlational patterns are driven by Indo-European languages.  
+
+### Overall Analyses
 Reorder columns to have measures of the same domain together.
 ```{r}
 col_order <- c("BV_char_per_tok", "CR_inflection_accuracy", "CR_ttr",
@@ -191,7 +213,7 @@ col_order <- c("BV_char_per_tok", "CR_inflection_accuracy", "CR_ttr",
                "BV_avg_subordinate_chain_len", "BV_subordinate_pre", 
                "BV_subordinate_post", "BV_avg_verb_edges", "S_idMean", "S_idSD", "SI_dep_dl")
 track.b.short.reorder <- track.b.short[, col_order]
-track.b.short.reorder
+#track.b.short.reorder
 ```
 
 Same as above for Track A. 
@@ -209,6 +231,52 @@ Safe to file.
 ```{r, warning = FALSE}
 ggsave("Figures/Corrs/correlogram_TrackB.pdf", correlogram.TrackB, 
        dpi = 300, scale = 1, width = 12, height = 12, device = cairo_pdf)
+```
+
+### Analyses for Indo-European languages only
+Reorder columns to have measures of the same domain together.
+```{r}
+col_order <- c("BV_char_per_tok", "CR_inflection_accuracy", "CR_ttr",
+               "CR_msp", "CR_mfe", "CR_cfe_form_feat", "CR_cfe_feat_form",
+               "SI_dm", "SI_hm", "SBS_INF", "SBS_DER", "BV_n_tokens", 
+               "BV_verbal_head_per_sent", "BV_verbal_root_perc", "BV_avg_links_len",
+               "BV_avg_subordinate_chain_len", "BV_subordinate_pre", 
+               "BV_subordinate_post", "BV_avg_verb_edges", "S_idMean", "S_idSD", "SI_dep_dl")
+track.b.short.IE.reorder <- track.b.IE.short[, col_order]
+```
+
+Get correlation results. 
+```{r, fig.width = 12, fig.height = 12, message = F}
+cor.results.b.IE <- corr.test(track.b.short.IE.reorder, method = "spearman", 
+                         use = "pairwise.complete.obs", adjust = "holm")
+# produce correlogram
+correlogram.TrackB.IE <- ggcorrplot(cor.results.b.IE$r, p.mat = cor.results.b.IE$p, type = "lower",
+     outline.col = "white", colors = c("#3C77AE", "white", "#AE3C3C"),
+     lab = T, insig = "pch")
+correlogram.TrackB.IE
+```
+
+### Analyses for non-Indo-European languages only
+Reorder columns to have measures of the same domain together.
+```{r}
+col_order <- c("BV_char_per_tok", "CR_inflection_accuracy", "CR_ttr",
+               "CR_msp", "CR_mfe", "CR_cfe_form_feat", "CR_cfe_feat_form",
+               "SI_dm", "SI_hm", "SBS_INF", "SBS_DER", "BV_n_tokens", 
+               "BV_verbal_head_per_sent", "BV_verbal_root_perc", "BV_avg_links_len",
+               "BV_avg_subordinate_chain_len", "BV_subordinate_pre", 
+               "BV_subordinate_post", "BV_avg_verb_edges", "S_idMean", "S_idSD", "SI_dep_dl")
+track.b.short.nonIE.reorder <- track.b.nonIE.short[, col_order]
+```
+
+Get correlation results. 
+```{r, fig.width = 12, fig.height = 12, message = F}
+cor.results.b.nonIE <- corr.test(track.b.short.nonIE.reorder, method = "spearman", 
+                         use = "pairwise.complete.obs", adjust = "holm")
+# produce correlogram
+correlogram.TrackB.nonIE <- ggcorrplot(cor.results.b.nonIE$r, p.mat = cor.results.b.nonIE$p, type = "lower",
+     outline.col = "white", colors = c("#3C77AE", "white", "#AE3C3C"),
+     lab = T, insig = "pch")
+correlogram.TrackB.nonIE
 ```
 
 # Detailed Scatterplots 
@@ -274,7 +342,7 @@ track.b.positive.detailed <- ggplot(track.b, aes(x = CR_msp, y = SBS_INF)) +
 # track.b.positive.detailed
 ```
 
-Some comments: This plot shows the correlation between the so-called Mean Size of Morphological Paradigms (MSP), which is defined by CR as "simply the number of word-form types divided by the number of lemma types", and the difference in unigram entropy of word tokens in the original texts and the lemmatized texts (INF) as defined by SBS. It is certainly not unexpected, but reassuring, to see these measures highly correlated. The outlier to the high end Uyghur (uig) is likely *not* an artifact, as this language indeed has many productive morphological paradigms. Other languages to the high end of morphological complexity include Ancient Greek (grc), Classical Latin (lat), Turkish (tur), and Old Church Slavonic (chu). Languages to the low end are Vietnamese (vie), Indonesian (ind), Mandarin Chinese (cmn), and Afrikaans (afr). Note that the very low morphological complexity scores of Korean (kor) are an artifact of the way the Korean data is presented in the UD. Namely, the "lemmas" given for Korean are actually merely morphologically segmented forms rather than inflectionally neutralized forms as for the other languages. Thus, it makes sense that the MSP is exactly 1 and the INF is 0. 
+Some comments: This plot shows the correlation between the so-called Mean Size of Morphological Paradigms (MSP), which is defined by CR as "simply the number of word-form types divided by the number of lemma types", and the difference in unigram entropy of word tokens in the original texts and the lemmatized texts (INF) as defined by SBS. It is certainly not unexpected, but reassuring, to see these measures highly correlated. The outlier to the high end Uyghur (uig) is likely *not* an artifact, as this language indeed has many productive morphological paradigms. Other languages to the high end of morphological complexity include Ancient Greek (grc), Classical Latin (lat), Turkish (tur), and Old Church Slavonic (chu). Languages to the low end are Vietnamese (vie), Indonesian (ind), Mandarin Chinese (cmn), and Afrikaans (afr). Note that the very low morphological complexity scores of Korean (kor) are an artifact of the way the Korean data is presented in the UD. Namely, the "lemmas" given for Korean are actually merely morphologically segmented forms rather than inflectionally neutralized forms as for the other languages. Thus, it makes sense that the MSP is exactly 1 and the INF is 0 for Korean. 
 
 # TRACK A (Highest Negative Correlation)
 ```{r, fig.width = 5, fig.height = 5, warning = FALSE}
@@ -346,9 +414,9 @@ ggsave("Figures/Corrs/scatterplots.pdf", scatterplots, dpi = 300,
 # Conclusions
 Some more general observations based on these analyses include:
 
-- Many of the measures proposed by the same participants highly correlate. This is the case, for instance, for the measures proposed by GM in Track A, but also measures of BV in Track B. In the case of GM, this is because many of the measures are virtually the same, but with minor shades of modification. In the case of BV, while at first sight the measures seem to conceptually differ, they essentially boil down to the same underlying causes. For example, the number of tokens in a sentence highly predicts the average maximal depth of a tree over the sentence. So, arguably most of these positive intra-participant correlations are driven by redundancy in the proposed measures. 
+- Many of the measures proposed by the same participants have high positive correlations. This is the case, for instance, for the measures proposed by GM in Track A, but also measures of BV in Track B. In the case of GM, this is because many of the measures are virtually the same, but with minor shades of modification. In the case of BV, while at first sight the measures seem to conceptually differ, they essentially boil down to the same underlying causes. For example, the number of tokens in a sentence highly predicts the average maximal depth of a tree over the sentence. So, arguably most of these positive intra-participant correlations are driven by redundancy in the proposed measures. 
 
-- There are several strong positive correlations between simple measures relating to the number of types and tokens (GM_TTR_fullyparallelised, BV_n_tokens, etc.), and measures of information density (O_WID, S_idSD). Interestingly, this is the case for both tracks, since Oh used the Bible texts, and Semenuks used the UD. Information density is generally assumed to be a measure which has psycholinguistic relevance in terms of language processing. However, the fact that it is highly predictable by some of the simplest word frequency measures (TTR) potentially goes to show that the underlying principles driving complexity are fairly similar.    
+- There are several strong positive correlations between simple measures relating to the number of types and tokens (GM_TTR_fullyparallelised, BV_n_tokens, etc.), and measures of information density (O_WID, S_idSD). Interestingly, this is the case for both tracks, since Oh used the Bible texts, and Semenuks used the UD. Information density is generally assumed to be a measure which has psycholinguistic relevance in terms of language processing. The fact that it is highly predictable by some of the simplest word frequency measures (TTR) potentially goes to show that the underlying principles driving complexity are similar across different conceptualizations and measures.    
 
 - A negative correlation which seems robust in Track A is found between syllable information density (O_SID) and measures of lexical diversity like TTR (although there are few data points in O_SID). This is potential evidence for a trade-off between syllable complexity and word complexity reported also in earlier studies. A negative correlation in Track B which seems both robust and potentially interesting is that the dependency lengths in noun phrases with marked possessives (SI_dep_dl) apparently are in an inverse relationship with different measures of inflectional complexity.  
 
