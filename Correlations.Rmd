@@ -38,6 +38,10 @@ Give the package versions.
 installed.packages()[names(sessionInfo()$otherPkgs), "Version"]
 ```
 
+# Introduction
+
+This file gives the code to calculate correlations between empirical complexity measurements in Track A and Track B.
+
 # Load the Data 
 The participants' results are loaded as csv files directly from the github repository into separate data frames. We only use the name of the first author (lower case) to name the data frame.
 ```{r, message = FALSE}
@@ -283,6 +287,8 @@ Combine plots in one panel.
 ```{r, fig.width = 24, fig.height = 24}
 grid.arrange(correlogram.TrackB.IE, correlogram.TrackB.nonIE, ncol = 2)
 ```
+
+Interpretation: The correlograms for Indo-European languages and non-Indo-European (Japanese, Mandarin Chinese, Arabic, etc.) look similar in the sense that in both we have mainly positive correlations between measures in the same domain (i.e. red colors in the lower left and upper right corner), and mainly negative correlations between the domains (i.e. blue colors) in the lower right corner. One difference between the correlograms is that there are more significant correlations for the IE languages. This is expected since there are considerably more IE languages in Track B (i.e. 31) than non-IE languages (i.e. 13), which gives us more statistical power to detect significant correlations.
 
 # Detailed Scatterplots 
 We here plot the highest *positive* and *negative* correlations (in terms of Spearman coefficients) which are still significant after the Holm-Bonferroni correction *and* which are found between measures proposed by *different participants* (there are many measures by the same participants that highly correlate). These are hand-picked from the correlograms above.
