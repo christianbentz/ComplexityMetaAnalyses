@@ -1,7 +1,7 @@
 ---
 title: "Appendix 4: Correlations Between Complexity Measures"
 author: "Chris Bentz"
-date: "04 June, 2021"
+date: "08 June, 2021"
 output:
   pdf_document: default
   html_document: default
@@ -252,8 +252,8 @@ cor.results.b.IE <- corr.test(track.b.short.IE.reorder, method = "spearman",
 # produce correlogram
 correlogram.TrackB.IE <- ggcorrplot(cor.results.b.IE$r, p.mat = cor.results.b.IE$p, type = "lower",
      outline.col = "white", colors = c("#3C77AE", "white", "#AE3C3C"),
-     lab = T, insig = "pch")
-correlogram.TrackB.IE
+     lab = T, insig = "pch", title = "Indo-European languages")
+#correlogram.TrackB.IE
 ```
 
 ### Analyses for non-Indo-European languages only
@@ -275,8 +275,13 @@ cor.results.b.nonIE <- corr.test(track.b.short.nonIE.reorder, method = "spearman
 # produce correlogram
 correlogram.TrackB.nonIE <- ggcorrplot(cor.results.b.nonIE$r, p.mat = cor.results.b.nonIE$p, type = "lower",
      outline.col = "white", colors = c("#3C77AE", "white", "#AE3C3C"),
-     lab = T, insig = "pch")
-correlogram.TrackB.nonIE
+     lab = T, insig = "pch", title = "Non-Indo-European languages")
+#correlogram.TrackB.nonIE
+```
+
+Combine plots in one panel.
+```{r, fig.width = 24, fig.height = 24}
+grid.arrange(correlogram.TrackB.IE, correlogram.TrackB.nonIE, ncol = 2)
 ```
 
 # Detailed Scatterplots 
