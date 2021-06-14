@@ -1,7 +1,7 @@
 ---
 title: "Appendix 3: World Maps"
 author: 'Chris Bentz'
-date: "11 June, 2021"
+date: "14 June, 2021"
 output:
   pdf_document: default
   html_document: default
@@ -54,24 +54,29 @@ unique(languages$macroarea) # macroareas: 6
 ```{r}
 # remove Norwegian Nynorsk (nno) since this has NAs in glottolog
 languages <- languages[languages$isocodes != "nno", ]
+# add 360 to longitudes for languages with longitudes < -25 
+# (this is necessary to create a Pacific centered map)
+languages$longitude[languages$longitude < -25] <- 
+  languages$longitude[languages$longitude < -25] + 360
+# select non-European languages 
 ```
 
 # World Map
 World maps with macroarea information from Glottolog.
 ```{r, fig.width = 8, fig.height = 9, warning = FALSE}
 # create world map
-world <- map_data("world")
+world <- map_data("world", wrap = c(-25, 335)) 
 family.map <- ggplot() + 
   geom_polygon(data = world, aes(x = long, y = lat, group = group), 
                fill = "white", colour = "darkgrey") +
   geom_point(data = languages, aes(x = longitude, y = latitude, 
                                  fill = family_id), 
-             alpha = 0.9, size = 3, pch = 21) +
+             alpha = 0.9, size = 2, pch = 21) +
   geom_text_repel(data = languages, aes(x = longitude, y = latitude, 
                                         label = name), size = 2,
-                  box.padding = unit(0.1, 'lines'), force = 0.5) +
+                  box.padding = unit(0.2, 'lines'), force = 1) +
   scale_y_continuous(limits = c(-65, 80)) +
-  scale_x_continuous(breaks = c(-180, -90, 0, 90, 180)) +
+  #scale_x_continuous(breaks = c(-180, -90, 0, 90, 180)) +
   labs(x = "longitude", y = "latitude", fill = "Language Family") +
   theme_bw() +
   facet_wrap (~ corpus, nrow = 2) +
