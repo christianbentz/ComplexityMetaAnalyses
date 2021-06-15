@@ -1,7 +1,7 @@
 ---
 title: 'Appendix 1: Theoretical Background'
 author: ""
-date: "29 March 2021"
+date: "June 15, 2021"
 output:
   pdf_document: default
   html_document: default  
@@ -38,10 +38,10 @@ installed.packages()[names(sessionInfo()$otherPkgs), "Version"]
 ```
 
 # Introduction
-We here give a proof by counterexample that negative correlations between measurements of complexity in different domains (i.e. complexity trade-offs) do not strictly entail equi-complexity (in the sense of equality of mean complexity) of languages on which these measurements are taken. 
+We here give a proof by counterexample that negative correlations between measurements of complexity in different domains (i.e. complexity trade-offs) do not strictly entail equi-complexity (in the sense of equality of mean complexity) of languages. 
 
 # Theoretical Background
-Let us assume we have $n$ languages for which we measure complexities in two domains, e.g. syntax and morphology, such that we get two samples of measurments $m = (m_1, m_2, \dots , m_n)$ and $s = (s_1, s_2, \dots , s_n)$. This situation is illustrated in the table below.
+Let us assume we have $n$ languages for which we measure complexities in two domains, e.g. syntax and morphology, such that we get two samples of measurements $m = (m_1, m_2, \dots , m_n)$ and $s = (s_1, s_2, \dots , s_n)$. This situation is illustrated in the table below.
 
 \begin{table}[ht!]
 \begin{tabular}{lll}
@@ -86,7 +86,7 @@ We have a negative correlation $r_{ms} < 0$ iff the numerator is negative, i.e.
 
 Note that the denominator cannot be negative.
 
-The Spearman correlation coefficient, on the other hand, is then defined as 
+The Spearman correlation coefficient, on the other hand, is defined as 
 
 \begin{equation}\label{eq:spearman}
 \rho_{ms} = 1 - \frac{6 \sum_{i=1}^{n} (\text{rank}(m_i)-\text{rank}(s_i))^2}{n(n^2-1)},
@@ -120,12 +120,12 @@ and
 For simplicity we here have just two different domains and just one measure per domain, i.e. one measure for morphology and one for syntax. Of course, in actual practice we could also have more than two domains, and several measures per domain.  
 
 # Proof
-We here proof by counterexample that neither a negative Pearson nor a negative Spearman correlation between two samples of complexity measurements in different domains strictly entails equality of means for the respective languages from which these measurments were taken. In other words, we will disproof by counterexample the claim that    
+We here proof by counterexample that neither a negative Pearson nor a negative Spearman correlation between two samples of complexity measurements in different domains strictly entails equality of means for the respective languages from which these measurements were taken. In other words, we will disproof by counterexample the claim that    
 \begin{equation}
 (r_{ms} < 0), (\rho_{ms} < 0) \vdash (\overline{L_j} = \overline{L_k}).
 \end{equation}
 
-Firstly, assume that we have a perfect negative Pearson and Spearman correlation between two samples, i.e. $r_{ms} = \rho_{ms} = -1$. For example, assume that m = (1, 2, 3, 4, 5), while the syntactic complexity can be perfectly linearly predicted by $s = 6 - 1m$ across five different languages. In other words, the syntactic complexity values are a linear transformation of the morphological complexity values. We thus have the following table of measurements per language and domain:
+Firstly, assume that we have a perfect negative Pearson and Spearman correlation between two samples, i.e. $r_{ms} = \rho_{ms} = -1$. For example, assume that the morphological complexities are m = (1, 2, 3, 4, 5) across five different languages, and the syntactic complexities can be perfectly linearly predicted by $s = 6 - 1m$. In other words, the syntactic complexity values are a linear transformation of the morphological complexity values. We thus have the following table of measurements per language and domain:
 
 ```{r}
 language = c("L1", "L2", "L3", "L4", "L5")
@@ -160,7 +160,7 @@ For the numerator of the Pearson correlation we have
 \end{split}
 \end{equation}
 
-The condition for a negative Pearson correlation in equation (\ref{eq:pearsonNum}) is hence fullfilled. In fact, in this particular case it is a perfect negative correlation ($r_{ms} = -1$) since the denominator of the formular for the Pearson coefficient in equation (\ref{eq:pearson}) evaluates to 10.
+The condition for a negative Pearson correlation in equation (\ref{eq:pearsonNum}) is hence fulfilled. In fact, in this particular case it is a perfect negative correlation ($r_{ms} = -1$) since the denominator of the formula for the Pearson coefficient in equation (\ref{eq:pearson}) evaluates to 10.
 
 This result can be double-checked with the R function cor().
 ```{r}
@@ -223,10 +223,10 @@ For the condition for a negative Pearson correlation we now get
 \end{split}
 \end{equation}
 
-Hence, this condition is still fullfilled, and we have a negative Pearson correlation. In fact, the Pearson correlation is still perfect, i.e. -1, as can be double-checked with the cor() function.
+Hence, this condition is still fulfilled, and we have a negative Pearson correlation. In fact, the Pearson correlation is still perfect, i.e. -1, as can be double-checked with the cor() function.
 
 ```{r}
-cor(example.df$m, example.df$s_prime, method = "pearson")
+cor(example.df$m, example.df$s_prime1, method = "pearson")
 ```
 
 In order to evaluate the Spearman condition (equation (\ref{eq:spearmanCond})), we first create a table with the rankings of complexity measurements in ascending order. 
@@ -262,7 +262,7 @@ In sum, a linear transformation which "flattens" the curve between morphological
 # Standardization
 
 ## Standardization of linearly transformed data
-In the proof above we have used two slightly differing linear transformations to derive $s$ and $s^{\prime}$ from m. A general formular for linear transformations is $y = a + bx$. In the first case we used a = 6 and b = -1, and in the second case a = 5 and b = -0.5. It is noteworthy in this context that standardization of the sample values neutralizes the effect of linear transformations on the mean values of languages.  
+In the proof above we have used two slightly differing linear transformations to derive $s$ and $s^{\prime}$ from m. A general formula for linear transformations is $y = a + bx$. In the first case we used a = 6 and b = -1, and in the second case a = 5 and b = -0.5. It is noteworthy in this context that standardization of the sample values neutralizes the effect of linear transformations on the mean values of languages.  
 
 Standardization typically involves centering (which is defined as subtracting the mean value from all individual values of a sample), and scaling (which is defined as dividing the values of a sample by the standard deviation of the sample.). For instance, with the morphological complexity values centering is defined as 
 
@@ -371,25 +371,27 @@ transformation <- rep("non-linear", 5)
 nonlinear.df <- data.frame(language, transformation, standardization, m, s_prime2)
 colnames(nonlinear.df) <- c("language", "transformation", 
                             "standardization", "morphology", "syntax")
-# standarized original
+# standardized original
 transformation <- rep("none", 5)
 standardization <- rep("standardized", 5)
 standardized.original.df <- data.frame(language, transformation, 
                                        standardization, m_standardized, s_standardized)
 colnames(standardized.original.df) <- c("language", "transformation", 
                                         "standardization", "morphology", "syntax")
-# standarized linear transformation of s
+# standardized linear transformation of s
 transformation <- rep("linear", 5)
 standardization <- rep("standardized", 5)
 standardized.linear.df <- data.frame(language, transformation, 
-                                       standardization, m_standardized, s_prime1_standardized)
+                                       standardization, m_standardized, 
+                                     s_prime1_standardized)
 colnames(standardized.linear.df) <- c("language", "transformation", 
                                       "standardization", "morphology", "syntax")
-# standarized non-linear transformation of s
+# standardized non-linear transformation of s
 transformation <- rep("non-linear", 5)
 standardization <- rep("standardized", 5)
 standardized.nonlinear.df <- data.frame(language, transformation, 
-                                        standardization, m_standardized, s_prime2_standardized)
+                                        standardization, m_standardized, 
+                                        s_prime2_standardized)
 colnames(standardized.nonlinear.df) <- c("language", "transformation", 
                                          "standardization", "morphology", "syntax")
 #combine all
@@ -402,7 +404,8 @@ print(combined.df)
 
 Scatterplot with original values.
 ```{r, fig.width = 4, fig.height = 4, warning = FALSE}
-scatterplot.original <- ggplot(combined.df[combined.df$standardization == "non-standardized", ], 
+scatterplot.original <- ggplot(combined.df[combined.df$standardization == 
+                                             "non-standardized", ], 
                       aes(x = morphology, y = syntax, group = transformation,
                           shape = language, color = transformation)) + 
   geom_point(alpha = 0.7, size = 3) +
@@ -415,7 +418,8 @@ scatterplot.original <- ggplot(combined.df[combined.df$standardization == "non-s
 ```
 Scatterplot with standardized values.
 ```{r, fig.width = 4, fig.height = 4, warning = FALSE}
-scatterplot.standardized <- ggplot(combined.df[combined.df$standardization == "standardized", ], 
+scatterplot.standardized <- ggplot(combined.df[combined.df$standardization == 
+                                                 "standardized", ], 
                      aes(x = morphology, y = jitter(syntax), group = transformation,
                           shape = language, color = transformation)) + 
   geom_point(alpha = 0.7, size = 3) +
@@ -428,7 +432,8 @@ scatterplot.standardized <- ggplot(combined.df[combined.df$standardization == "s
 
 Combine plots.
 ```{r, fig.width = 10, fig.height = 4, warning = FALSE}
-combined.plot <- grid.arrange(scatterplot.original, scatterplot.standardized, ncol = 2, widths = c(1.5,2))
+combined.plot <- grid.arrange(scatterplot.original, scatterplot.standardized, 
+                              ncol = 2, widths = c(1.5,2))
 ```
 
 Save to file.
@@ -440,7 +445,7 @@ ggsave("Figures/Theoretical/transformationsPlot.pdf", combined.plot,
 # Summary
 In conclusion, measurements of complexity in separate domains (here morphology and syntax) might well have perfect Pearson and Spearman correlations across languages, while mean complexity values per language can still differ. 
 
-Firstly, we have illustrated this dissociation between negative correlations and equality of means by using a linear transformation of syntactic complexity measurements. This linear transformation preserves the Pearson and Spearman correlations, but breaks equality of means. 
+Firstly, we have illustrated this dissociation between negative correlations and equality of means by using a linear transformation of syntactic complexity measurements. This linear transformation preserves the Pearson and Spearman correlations across five languages, but breaks equality of means. 
 
 Secondly, we have shown that in the case of such a linear transformation, equality of means can be recovered by standardization of the values per domain. However, for non-linear transformations (at least the quadratic transformation discussed here) this is not necessarily the case. 
 

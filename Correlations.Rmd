@@ -1,7 +1,7 @@
 ---
 title: "Appendix 4: Correlations Between Complexity Measures"
-author: "Chris Bentz"
-date: "08 June, 2021"
+author: ""
+date: "June 15, 2021"
 output:
   pdf_document: default
   html_document: default
@@ -106,7 +106,7 @@ track.b <- track.b[ , -which(names(track.b) %in% c("BV_avg_max_depth",
                                                    "SI_zero_dl"))]
 ```
 
-Invert the values (by substracting them from 1) for the measure "CR_inflection_accurracy" in Track B. Note that higher values in the original measure mean *lower* rather than higher complexity.
+Invert the values (by subtracting them from 1) for the measure "CR_inflection_accuracy" in Track B. Note that higher values in the original measure mean *lower* rather than higher complexity.
 ```{r}
 track.b$CR_inflection_accuracy <- 1-track.b$CR_inflection_accuracy
 ```
@@ -205,7 +205,7 @@ ggsave("Figures/Corrs/correlogram_TrackA.pdf", correlogram.TrackA,
 ```
 
 ## TRACK B
-Since Indo-European languages are overrepresented in Track B (Universal Dependencies data), we here first give an overall correlational analysis regardless of language family, and then we give separate analyses for Indo-European and non-Indo-European languages. This helps to get an idea to what extent the overall correlational patterns are driven by Indo-European languages.  
+Since Indo-European languages are over-represented in Track B (Universal Dependencies data), we here first give an overall correlational analysis regardless of language family, and then we give separate analyses for Indo-European and non-Indo-European languages. This helps to get an idea to what extent the overall correlational patterns are driven by Indo-European languages.  
 
 ### Overall Analyses
 Reorder columns to have measures of the same domain together.
@@ -322,7 +322,7 @@ track.a.positive.detailed <- ggplot(track.a, aes(x = GM_TTR_fullyparallelised, y
 # track.a.positive.detailed
 ```
 
-Some comments: This plot shows that the Type-Token Ratio (TTR) and the Word Information Density (WID) are highly correlated across the languages of the Parallel Bible Corpus sample. Burmese (mya) is an outlier here with very high TTR and WID. This is an artifact of the writing system, since it does not delimit orthographic words by white spaces, but rather phrases. For Kalaallisut, on the other hand, the result makes sense (if we accept the latinized writing proposed for this language). Some of the low TTR languages include Sango (sag), Fijian (fij), Thai (tha), and Yoruba (yor).   
+Some comments: This plot shows that the Type-Token Ratio (TTR) and the Word Information Density (WID) are highly positively correlated across the languages of the Parallel Bible Corpus sample. Burmese (mya) is an outlier here with very high TTR and WID. This is an artifact of the writing system, since it does not delimit orthographic words by white spaces, but rather phrases. For Kalaallisut, on the other hand, the result makes sense also in the light of morphological typology (if we accept the latinized writing proposed for this language). Some of the low TTR languages include Sango (sag), Fijian (fij), Thai (tha), and Yoruba (yor).   
 
 # TRACK B (Highest Positive Correlation)
 ```{r, fig.width = 5, fig.height = 5, warning = FALSE}
@@ -425,7 +425,7 @@ ggsave("Figures/Corrs/scatterplots.pdf", scatterplots, dpi = 300,
 # Conclusions
 Some more general observations based on these analyses include:
 
-- Many of the measures proposed by the same participants have high positive correlations. This is the case, for instance, for the measures proposed by GM in Track A, but also measures of BV in Track B. In the case of GM, this is because many of the measures are virtually the same, but with minor shades of modification. In the case of BV, while at first sight the measures seem to conceptually differ, they essentially boil down to the same underlying causes. For example, the number of tokens in a sentence highly predicts the average maximal depth of a tree over the sentence. So, arguably most of these positive intra-participant correlations are driven by redundancy in the proposed measures. 
+- Many of the measures proposed by the same participants have high positive correlations. This is the case, for instance, for the measures proposed by GM in Track A, but also measures of BV in Track B. In the case of GM, this is because many of the measures are virtually the same, but with minor shades of modification. In the case of BV, while at first sight the measures seem to conceptually differ, they essentially boil down to the same underlying causes. For example, the number of tokens in a sentence highly predicts the average maximal depth of a tree over the sentence. So, arguably, most of these positive intra-participant correlations are driven by redundancy in the proposed measures. 
 
 - There are several strong positive correlations between simple measures relating to the number of types and tokens (GM_TTR_fullyparallelised, BV_n_tokens, etc.), and measures of information density (O_WID, S_idSD). Interestingly, this is the case for both tracks, since Oh used the Bible texts, and Semenuks used the UD. Information density is generally assumed to be a measure which has psycholinguistic relevance in terms of language processing. The fact that it is highly predictable by some of the simplest word frequency measures (TTR) potentially goes to show that the underlying principles driving complexity are similar across different conceptualizations and measures.    
 

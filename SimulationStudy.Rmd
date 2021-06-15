@@ -1,7 +1,7 @@
 ---
 title: "Appendix 2: Simulation Study"
-author: 'Chris Bentz'
-date: "08 June 2021"
+author: ''
+date: "June 15, 2021"
 output:
   pdf_document: default
   html_document: default
@@ -38,10 +38,10 @@ installed.packages()[names(sessionInfo()$otherPkgs), "Version"]
 ```
 
 # Introduction
-The purpose of this file is to illustrate the decisions we take to statistically analyse the respective data, i.e. checking for normality of the data, choosing a statistical test for assessing equality in the mean values of two distributions, and getting effect sizes for this test. Both is achieved by using simulated data, i.e. pseudo-complexity measurements for two domains (e.g. syntax and morphology) across different languages. This also further illustrates the theoretical points made in the file on "theoretical background" with simulated data. 
+The purpose of this file is to illustrate the decisions we take to statistically analyze the respective data, i.e. checking for normality of the data, choosing a statistical test for assessing equality in the mean values of two distributions, and getting effect sizes for this test. Both is achieved by using simulated data, i.e. pseudo-complexity measurements for two domains (e.g. syntax and morphology) across different languages. This also further illustrates the theoretical points made in the file on "theoretical background" with simulated data. 
 
 # Generate Correlated Data
-We here generate correlated pseudo-complexity measurements for for a given number of languages n. The number of measurements per domain can also be chosen (k). We then apply standardization, as well as linear and non-linear transformations to illustrate how this impacts the results of correlation and mean value analyses. 
+We here generate correlated pseudo-complexity measurements for for a given number of languages $n$. The number of measurements per domain can also be chosen ($k$). We then apply standardization, as well as linear and non-linear transformations to illustrate how this impacts the results of correlation and mean value analyses. 
 ```{r}
 # set the seed for random number generation in order to 
 # get the same result when the code is re-run
@@ -121,7 +121,8 @@ print(simulation.scatterplot)
 ```
 
 ## For selected parts of the data
-```{r, fig.width = 5, fig.height = 4, warning = FALSE}
+Select the scaled morphological pseudo-complexity values, and the scaled syntactic pseudo-complexity values after non-linear transformation of the values of language 2. Note that for this data set we expect to find negative correlations *and* significant shifts in overall complexity vectors according to the proof in the appendix on the theoretical background. 
+```{r, fig.width = 5, fig.height = 4, messages = FALSE, warning = FALSE}
 scatterplot.selected <- ggplot(simulation.df.wide, aes(x = value.scaled.morphology, 
                                                        y = value.nt.scaled.syntax, 
                                                        color = language)) + 
@@ -140,19 +141,24 @@ Plot density distributions of complexity pseudo-measurements by language. Indivi
 Get mean, median, and standard deviation values.
 ```{r}
 # get mean values for each language
-mu <- ddply(simulation.df, "language", summarise, grp.mean = mean(value.scaled, na.rm = T))
+mu <- ddply(simulation.df, "language", summarise, 
+            grp.mean = mean(value.scaled, na.rm = T))
 # get median values for each language
-med <- ddply(simulation.df, "language", summarise, grp.median = median(value.scaled, na.rm = T))
+med <- ddply(simulation.df, "language", summarise, 
+             grp.median = median(value.scaled, na.rm = T))
 # get standard deviation values for each language
-sdev <- ddply(simulation.df, "language", summarise, grp.sd = sd(value.scaled, na.rm = T)) 
+sdev <- ddply(simulation.df, "language", summarise, 
+              grp.sd = sd(value.scaled, na.rm = T)) 
 ```
 
 Plot density distributions with indication of median (mean) values.
 ```{r, fig.width = 7, fig.height = 4}
-density.plot <- ggplot(simulation.df, aes(x = value.scaled, color = domain, fill = domain)) +
+density.plot <- ggplot(simulation.df, aes(x = value.scaled, 
+                                          color = domain, fill = domain)) +
   geom_density(alpha = .2) +
+  # add some jitter to prevent overplotting
   geom_jitter(data = simulation.df, aes(x = value.scaled, y = 0), 
-             size = 1, height = 0.001, width = 0) + # add some jitter to prevent overplotting
+             size = 1, height = 0.001, width = 0) + 
   geom_vline(aes(xintercept = 0), color = "darkgrey") +
   geom_vline(data = med, aes(xintercept = grp.median), linetype = "dashed") +
   facet_wrap(~ language) +
@@ -166,19 +172,24 @@ print(density.plot)
 Get mean, median, and standard deviation values.
 ```{r}
 # get mean values for each language
-mu <- ddply(simulation.df, "language", summarise, grp.mean = mean(value.nt.scaled, na.rm = T))
+mu <- ddply(simulation.df, "language", summarise, 
+            grp.mean = mean(value.nt.scaled, na.rm = T))
 # get median values for each language
-med <- ddply(simulation.df, "language", summarise, grp.median = median(value.nt.scaled, na.rm = T))
+med <- ddply(simulation.df, "language", summarise, 
+             grp.median = median(value.nt.scaled, na.rm = T))
 # get standard deviation values for each language
-sdev <- ddply(simulation.df, "language", summarise, grp.sd = sd(value.nt.scaled, na.rm = T)) 
+sdev <- ddply(simulation.df, "language", summarise, 
+              grp.sd = sd(value.nt.scaled, na.rm = T)) 
 ```
 
 Plot density distributions with indication of median (mean) values.
 ```{r, fig.width = 7, fig.height = 4}
-density.plot <- ggplot(simulation.df, aes(x = value.nt.scaled, color = domain, fill = domain)) +
+density.plot <- ggplot(simulation.df, aes(x = value.nt.scaled, 
+                                          color = domain, fill = domain)) +
   geom_density(alpha = .2) +
+  # add some jitter to prevent overplotting
   geom_jitter(data = simulation.df, aes(x = value.nt.scaled, y = 0), 
-             size = 1, height = 0.001, width = 0) + # add some jitter to prevent overplotting
+             size = 1, height = 0.001, width = 0) + 
   geom_vline(aes(xintercept = 0), color = "darkgrey") +
   geom_vline(data = med, aes(xintercept = grp.median), linetype = "dashed") +
   facet_wrap(~ language) +
@@ -201,32 +212,34 @@ ggplot(simulation.df, aes(sample = value.nt.scaled)) +
 
 ## Choose statistical tests
 Select a statistical test:
-We choose the Wilcoxon test here as a non-parametric alternative to the t-test (Crawley 2007, p. 283; Baayen 2008, p. 77). 
+We choose the Wilcoxon signed rank test here as a non-parametric alternative to the t-test (Crawley 2007, p. 283; Baayen 2008, p. 77). The data is "paired" here since we generated pseudo-complexity measures for all languages and domains.
 
 Run pairwise Wilcoxon tests for the standardized original values.
 ```{r, message = F}
 # we add some random noise here to the value vector with
 # the function jitter(), since we otherwise get warnings due to ties in the data
-p.values <- pairwise.wilcox.test(jitter(simulation.df$value.scaled), simulation.df$language, 
-                     paired = F, p.adjust.method = "holm") 
+p.values <- pairwise.wilcox.test(jitter(simulation.df$value.scaled), 
+                                 simulation.df$language, paired = T, 
+                                 p.adjust.method = "holm") 
 p.values$p.value
 ```
 
 Run pairwise Wilcoxon tests for the standardized values with non-linear transformation of syntactic values.
 ```{r, message = F}
-p.values <- pairwise.wilcox.test(jitter(simulation.df$value.nt.scaled), simulation.df$language, 
-                     paired = F, p.adjust.method = "holm") 
+p.values <- pairwise.wilcox.test(jitter(simulation.df$value.nt.scaled), 
+                                 simulation.df$language, paired = T, 
+                                 p.adjust.method = "holm") 
 p.values$p.value
 ```
 
 # Effect Size
-An overview of effect size measures per statistical test is given in Patil (2020). In conjunction with the Wilcoxon signed rank test we here use the statistic r (i.e. function wilcox_effsize() of the "rstatix" package). 
+An overview of effect size measures per statistical test is given in Patil (2020). In conjunction with the Wilcoxon test we use the statistic r (i.e. function wilcox_effsize() of the "rstatix" package). 
 
 ```{r}
 # standardized original
-effect.sizes <- wilcox_effsize(simulation.df, value.scaled ~ language, paired = F)
+effect.sizes <- wilcox_effsize(simulation.df, value.scaled ~ language, paired = T)
 # standardized with non-linear transformation of syntactic values
-effect.sizes.nt <- wilcox_effsize(simulation.df, value.nt.scaled ~ language, paired = F)
+effect.sizes.nt <- wilcox_effsize(simulation.df, value.nt.scaled ~ language, paired = T)
 ```
 
 # Effect Size Heatmap
@@ -257,6 +270,13 @@ effect.sizes.nt.plot <- ggplot(as.data.frame(effect.sizes.nt), aes(group1, group
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 effect.sizes.nt.plot
 ```
+
+# Interpretation
+Firstly, we can see in the correlation plots that we consistently find negative and significant Pearson and Spearman correlations between morphological and syntactic pseudo-complexity values across languages.  
+
+Notice that for the standardized original data we also find no significant differences between any pair of languages in the Wilcoxon tests (p=1 for all pairs), and the effect sizes are in the range 0.01 to 0.26, i.e. small. However, for the data where we have a non-linear transformation of the syntactic pseudo-complexity values in language 2, we now find some significant differences in the Wilcoxon test (i.e. p < 0.05 for comparisons of language 2 with language 4 and 5), and these are matched with large effect sizes (i.e. 0.69 and 0.65). 
+
+This simulation hence corroborates the points of the proof in the appendix on ``theoretical background''. Namely, for standardized data with no transformations (or linear transformations) the link between negative correlations and equality of overall complexity holds. However, for data with non-linear transformations of pseudo-complexity values (here for language 2) this link breaks: we are able to detect significant shifts in the overall complexity location of language 2 despite the negative correlations in the domains.    
 
 # References
 Baayen, R. H. (2008). Analyzing linguistic data: A practical introduction using statistics in R. Cambridge University Press.
