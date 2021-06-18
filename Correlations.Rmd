@@ -1,7 +1,7 @@
 ---
 title: "Appendix 4: Correlations Between Complexity Measures"
 author: ""
-date: "June 15, 2021"
+date: "June 18, 2021"
 output:
   pdf_document: default
   html_document: default
@@ -227,7 +227,9 @@ cor.results.b <- corr.test(track.b.short.reorder, method = "spearman",
 # produce correlogram
 correlogram.TrackB <- ggcorrplot(cor.results.b$r, p.mat = cor.results.b$p, type = "lower",
      outline.col = "white", colors = c("#3C77AE", "white", "#AE3C3C"),
-     lab = T, insig = "pch")
+     lab = T, insig = "pch") +
+  geom_segment(aes(x = 10.5, y = 0.5, xend = 10.5, yend = 11.5)) + 
+  geom_segment(aes(x = 10.5, y = 11.5, xend = 21.5, yend = 11.5)) 
 correlogram.TrackB
 ```
 
@@ -256,7 +258,9 @@ cor.results.b.IE <- corr.test(track.b.short.IE.reorder, method = "spearman",
 # produce correlogram
 correlogram.TrackB.IE <- ggcorrplot(cor.results.b.IE$r, p.mat = cor.results.b.IE$p, type = "lower",
      outline.col = "white", colors = c("#3C77AE", "white", "#AE3C3C"),
-     lab = T, insig = "pch", title = "Indo-European languages")
+     lab = T, insig = "pch", title = "Indo-European languages") +
+  geom_segment(aes(x = 10.5, y = 0.5, xend = 10.5, yend = 11.5)) + 
+  geom_segment(aes(x = 10.5, y = 11.5, xend = 21.5, yend = 11.5)) 
 #correlogram.TrackB.IE
 ```
 
@@ -279,7 +283,9 @@ cor.results.b.nonIE <- corr.test(track.b.short.nonIE.reorder, method = "spearman
 # produce correlogram
 correlogram.TrackB.nonIE <- ggcorrplot(cor.results.b.nonIE$r, p.mat = cor.results.b.nonIE$p, type = "lower",
      outline.col = "white", colors = c("#3C77AE", "white", "#AE3C3C"),
-     lab = T, insig = "pch", title = "Non-Indo-European languages")
+     lab = T, insig = "pch", title = "Non-Indo-European languages") +
+  geom_segment(aes(x = 10.5, y = 0.5, xend = 10.5, yend = 11.5)) + 
+  geom_segment(aes(x = 10.5, y = 11.5, xend = 21.5, yend = 11.5)) 
 #correlogram.TrackB.nonIE
 ```
 
