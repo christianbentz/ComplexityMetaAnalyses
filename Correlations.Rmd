@@ -1,7 +1,7 @@
 ---
 title: "Appendix 4: Correlations Between Complexity Measures"
-author: ""
-date: "June 18, 2021"
+author: "Chris Bentz"
+date: "July 20, 2022"
 output:
   pdf_document: default
   html_document: default
@@ -190,9 +190,9 @@ cor.results.a <- corr.test(track.a.short, method = "spearman",
                          use = "pairwise.complete.obs", adjust = "holm")
 ```
 
-Give correlogram of selected measures.
+Give correlogram of selected measures. Note that the type has to be ``upper" here, since the corrected p-values are in the upper triangle of the matrix, while the unadjusted p-values are in the lower triangle (thanks to Sonia Petrini for pointing this out).
 ```{r, fig.width = 5.5, fig.height = 5.5, message = F}
-correlogram.TrackA <- ggcorrplot(cor.results.a$r, p.mat = cor.results.a$p, type = "lower",
+correlogram.TrackA <- ggcorrplot(cor.results.a$r, p.mat = cor.results.a$p, type = "upper",
      outline.col = "white", colors = c("#3C77AE", "white", "#AE3C3C"),
      lab = T, insig = "pch")
 correlogram.TrackA
@@ -225,11 +225,11 @@ Same as above for Track A.
 cor.results.b <- corr.test(track.b.short.reorder, method = "spearman", 
                          use = "pairwise.complete.obs", adjust = "holm")
 # produce correlogram
-correlogram.TrackB <- ggcorrplot(cor.results.b$r, p.mat = cor.results.b$p, type = "lower",
+correlogram.TrackB <- ggcorrplot(cor.results.b$r, p.mat = cor.results.b$p, type = "upper",
      outline.col = "white", colors = c("#3C77AE", "white", "#AE3C3C"),
      lab = T, insig = "pch") +
-  geom_segment(aes(x = 10.5, y = 0.5, xend = 10.5, yend = 11.5)) + 
-  geom_segment(aes(x = 10.5, y = 11.5, xend = 21.5, yend = 11.5)) 
+  geom_segment(aes(x = 11.5, y = 10.5, xend = 11.5, yend = 21.5)) + 
+  geom_segment(aes(x = 0.5, y = 10.5, xend = 11.5, yend = 10.5)) 
 correlogram.TrackB
 ```
 
@@ -256,11 +256,11 @@ Get correlation results.
 cor.results.b.IE <- corr.test(track.b.short.IE.reorder, method = "spearman", 
                          use = "pairwise.complete.obs", adjust = "holm")
 # produce correlogram
-correlogram.TrackB.IE <- ggcorrplot(cor.results.b.IE$r, p.mat = cor.results.b.IE$p, type = "lower",
-     outline.col = "white", colors = c("#3C77AE", "white", "#AE3C3C"),
+correlogram.TrackB.IE <- ggcorrplot(cor.results.b.IE$r, p.mat = cor.results.b.IE$p, 
+     type = "upper", outline.col = "white", colors = c("#3C77AE", "white", "#AE3C3C"),
      lab = T, insig = "pch", title = "Indo-European languages") +
-  geom_segment(aes(x = 10.5, y = 0.5, xend = 10.5, yend = 11.5)) + 
-  geom_segment(aes(x = 10.5, y = 11.5, xend = 21.5, yend = 11.5)) 
+  geom_segment(aes(x = 11.5, y = 10.5, xend = 11.5, yend = 21.5)) + 
+  geom_segment(aes(x = 0.5, y = 10.5, xend = 11.5, yend = 10.5)) 
 #correlogram.TrackB.IE
 ```
 
@@ -281,11 +281,11 @@ Get correlation results.
 cor.results.b.nonIE <- corr.test(track.b.short.nonIE.reorder, method = "spearman", 
                          use = "pairwise.complete.obs", adjust = "holm")
 # produce correlogram
-correlogram.TrackB.nonIE <- ggcorrplot(cor.results.b.nonIE$r, p.mat = cor.results.b.nonIE$p, type = "lower",
-     outline.col = "white", colors = c("#3C77AE", "white", "#AE3C3C"),
+correlogram.TrackB.nonIE <- ggcorrplot(cor.results.b.nonIE$r, p.mat = cor.results.b.nonIE$p, 
+     type = "upper", outline.col = "white", colors = c("#3C77AE", "white", "#AE3C3C"),
      lab = T, insig = "pch", title = "Non-Indo-European languages") +
-  geom_segment(aes(x = 10.5, y = 0.5, xend = 10.5, yend = 11.5)) + 
-  geom_segment(aes(x = 10.5, y = 11.5, xend = 21.5, yend = 11.5)) 
+  geom_segment(aes(x = 11.5, y = 10.5, xend = 11.5, yend = 21.5)) + 
+  geom_segment(aes(x = 0.5, y = 10.5, xend = 11.5, yend = 10.5)) 
 #correlogram.TrackB.nonIE
 ```
 
@@ -294,10 +294,10 @@ Combine plots in one panel.
 grid.arrange(correlogram.TrackB.IE, correlogram.TrackB.nonIE, ncol = 2)
 ```
 
-Interpretation: The correlograms for Indo-European languages and non-Indo-European (Japanese, Mandarin Chinese, Arabic, etc.) look similar in the sense that in both we have mainly positive correlations between measures in the same domain (i.e. red colors in the lower left and upper right corner), and mainly negative correlations between the domains (i.e. blue colors) in the lower right corner. One difference between the correlograms is that there are more significant correlations for the IE languages. This is expected since there are considerably more IE languages in Track B (i.e. 31) than non-IE languages (i.e. 13), which gives us more statistical power to detect significant correlations.
+Interpretation: The correlograms for Indo-European languages and non-Indo-European (Japanese, Mandarin Chinese, Arabic, etc.) look similar in the sense that in both we have mainly positive correlations between measures in the same domain (i.e. red colors in the lower left and upper right triangle), and mainly negative correlations between the domains (i.e. blue colors) in the upper left square. One difference between the correlograms is that there are more significant correlations for the IE languages. This is expected since there are considerably more IE languages in Track B (i.e. 31) than non-IE languages (i.e. 13), which gives us more statistical power to detect significant correlations.
 
 # Detailed Scatterplots 
-We here plot the highest *positive* and *negative* correlations (in terms of Spearman coefficients) which are still significant after the Holm-Bonferroni correction *and* which are found between measures proposed by *different participants* (there are many measures by the same participants that highly correlate). These are hand-picked from the correlograms above.
+We here plot the highest *positive* and *negative* correlations (in terms of Spearman coefficients) which are found between measures proposed by *different participants* (there are many measures by the same participants that highly correlate). These are hand-picked from the correlograms above.
 
 # TRACK A (Highest Positive Correlation)
 ```{r, fig.width = 5, fig.height = 5, warning = FALSE}
@@ -380,7 +380,7 @@ track.a.negative.detailed <- ggplot(track.a, aes(x = GM_TTR_fullyparallelised, y
 # track.a.negative.detailed
 ```
 
-Some comments: This plot shows a negative correlation between type-token-ratios in parallel texts (GM_TTR_fullyparallelised) and syllable information density (O_SID). This can be seen as a trade-off between the diversity of word types and the information carried by syllables. Languages with agglutinative morphology, e.g. Finnish and Turkish have many word types, but low syllable information density. Languages with rather isolating morphology, e.g. English and French, have fewer word types, but more information-dense syllables. 
+Some comments: This plot shows a negative correlation between type-token-ratios in parallel texts (GM_TTR_fullyparallelised) and syllable information density (O_SID). This can be seen as a trade-off between the diversity of word types and the information carried by syllables. Languages with agglutinative morphology, e.g. Finnish and Turkish have many word types, but low syllable information density. Languages with rather isolating morphology, e.g. English and French, have fewer word types, but more information-dense syllables. Note that this correlation is not significant after Holm-Bonferroni correction. Arguably, this has to do with the low number of languages for which syllabification is available. This leaves us with only 9 data points.
 
 # Track B (Highest Negative Correlation)
 ```{r, fig.width = 5, fig.height = 5, warning = FALSE}
@@ -435,7 +435,7 @@ Some more general observations based on these analyses include:
 
 - There are several strong positive correlations between simple measures relating to the number of types and tokens (GM_TTR_fullyparallelised, BV_n_tokens, etc.), and measures of information density (O_WID, S_idSD). Interestingly, this is the case for both tracks, since Oh used the Bible texts, and Semenuks used the UD. Information density is generally assumed to be a measure which has psycholinguistic relevance in terms of language processing. The fact that it is highly predictable by some of the simplest word frequency measures (TTR) potentially goes to show that the underlying principles driving complexity are similar across different conceptualizations and measures.    
 
-- A negative correlation which seems robust in Track A is found between syllable information density (O_SID) and measures of lexical diversity like TTR (although there are few data points in O_SID). This is potential evidence for a trade-off between syllable complexity and word complexity reported also in earlier studies. A negative correlation in Track B which seems both robust and potentially interesting is that the dependency lengths in noun phrases with marked possessives (SI_dep_dl) apparently are in an inverse relationship with different measures of inflectional complexity.  
+- An interesting negative correlation in Track A is found between syllable information density (O_SID) and measures of lexical diversity like TTR (although there are few data points in O_SID, and the correlation is not significant after correction for multiple testing). This is potential evidence for a trade-off between syllable complexity and word complexity reported also in earlier studies. A negative correlation in Track B which is robust after correction, and potentially interesting, is that the dependency lengths in noun phrases with marked possessives (SI_dep_dl) apparently are in an inverse relationship with different measures of inflectional complexity.  
 
 # References
 McDonald, J.H. (2014). Handbook of Biological Statistics (3rd ed.). Sparky House Publishing, Baltimore, Maryland. online at http://www.biostathandbook.com

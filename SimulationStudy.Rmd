@@ -1,7 +1,7 @@
 ---
 title: "Appendix 2: Simulation Study"
-author: ''
-date: "June 15, 2021"
+author: 'Chris Bentz'
+date: "July 20, 2022"
 output:
   pdf_document: default
   html_document: default
