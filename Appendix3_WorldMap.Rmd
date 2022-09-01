@@ -1,0 +1,94 @@
+---
+title: "Appendix 3: World Maps"
+author: 'Chris Bentz'
+date: "July 20, 2022"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Session Info
+Give the session info (reduced).
+```{r, echo = F}
+# R version
+sessionInfo()$R.version$version.string
+# platform
+sessionInfo()$R.version$platform 
+```
+
+# Load Libraries
+If the libraries are not installed yet, you need to install them using, for example, the command: install.packages("ggplot2").
+```{r, message = FALSE}
+library(readr)
+library(ggmap)
+library(maps)
+library(gridExtra)
+library(ggrepel)
+```
+
+Give the package versions.
+```{r, echo = F}
+# version of packages loaded
+installed.packages()[names(sessionInfo()$otherPkgs), "Version"]
+```
+
+# Load the Data 
+Load Glottolog (Version 4.1) language information combined with information on the language sample of the IWMLC.
+```{r, message = F}
+languages <- as.data.frame(read_csv("https://raw.githubusercontent.com/IWMLC/language-complexity-metrics/master/languages_metaInfo.csv"))
+```
+
+# Simple Stats
+```{r}
+length(unique(languages$isocodes)) # number of languages according to iso
+length(unique(languages$glottocode)) # number of languages according to glottolog
+length(unique(languages$family_id)) # number of language families according to glottolog
+unique(languages$macroarea) # number of macroareas according to glottolog
+```
+
+# Pre-Processing
+```{r}
+# remove Norwegian Nynorsk (nno) since this has NAs in glottolog
+languages <- languages[languages$isocodes != "nno", ]
+# add 360 to longitudes for languages with longitudes < -25 
+# (this is necessary to create a Pacific centered map)
+languages$longitude[languages$longitude < -25] <- 
+  languages$longitude[languages$longitude < -25] + 360
+```
+
+# World Map
+World maps with macroarea information from Glottolog.
+```{r, fig.width = 9, fig.height = 9, warning = FALSE}
+# create world map
+world <- map_data("world", wrap = c(-25, 335)) 
+area.map <- ggplot() + 
+  geom_polygon(data = world, aes(x = long, y = lat, group = group), 
+               fill = "white", colour = "darkgrey") +
+  geom_point(data = languages, aes(x = longitude, y = latitude, 
+                                 fill = macroarea), 
+             alpha = 0.9, size = 2.5, pch = 21) +
+  geom_text_repel(data = languages, aes(x = longitude, y = latitude, 
+                                        label = name), size = 2.5,
+                  box.padding = unit(0.1, 'lines'), force = 0.2) +
+  scale_y_continuous(limits = c(-65, 80)) +
+  labs(x = "longitude", y = "latitude", fill = "Macroarea") +
+  theme_bw() +
+  facet_wrap (~ corpus, nrow = 2) +
+  theme(axis.title.x = element_text(size = 12),
+        axis.title.y = element_text(size = 12),
+        title = element_text(size = 12),
+        legend.title = element_text(size = 10),
+        legend.text = element_text(size = 10),
+        legend.position = "bottom")
+area.map
+```
+
+Save to file.
+```{r, warning = FALSE}
+ggsave("Figures/WorldMap/worldMaps.pdf", area.map, 
+       dpi = 300, scale = 1, width = 9, height = 9, device = cairo_pdf)
+```
